@@ -10,7 +10,7 @@
 
 ## مشروع الرفع
 - المشروع المقترح على فايربيز: atallam-english
-- الرابط المتوقع: https://atallam-english.web.app
+- الرابط: https://atallam-english.web.app
 
 ## خطوات الرفع
 1. firebase projects:create atallam-english
