@@ -1,0 +1,49 @@
+<div id="installBar" class="subbar" dir="rtl" hidden style="position:fixed;left:16px;right:16px;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:6;justify-content:space-between;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;max-width:528px;margin:0 auto">
+  <span id="installTxt">ثبّت التطبيق على شاشتك الرئيسية</span><span class="row2"><button id="installBtn" type="button">ثبّت</button><button id="installX" type="button" aria-label="إغلاق">×</button></span>
+</div>
+<script>
+/* PWA: offline + install */
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{})); }
+(function(){
+  const bar=document.getElementById('installBar'), btn=document.getElementById('installBtn'), txt=document.getElementById('installTxt');
+  let dismissed=false; try{dismissed=localStorage.getItem('atallam-install-x')==='1'}catch(e){}
+  const standalone=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone;
+  let ev=null;
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault(); ev=e; if(!dismissed&&!standalone) bar.hidden=false;});
+  btn.onclick=async()=>{ if(ev){ ev.prompt(); await ev.userChoice; ev=null; bar.hidden=true; } };
+  document.getElementById('installX').onclick=()=>{bar.hidden=true; try{localStorage.setItem('atallam-install-x','1')}catch(e){}};
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  if(ios&&!standalone&&!dismissed){ txt.textContent='للتثبيت: دوس على زرار المشاركة وبعدين إضافة للشاشة الرئيسية'; btn.hidden=true; bar.hidden=false; }
+})();
+
+/* Optional account sync with Firebase */
+const FIREBASE_CONFIG = __FIREBASE_CONFIG__;
+(function(){
+  if(!FIREBASE_CONFIG) return;
+  const V='10.12.2', base='https://www.gstatic.com/firebasejs/'+V+'/';
+  const load=src=>new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=no;document.head.appendChild(s);});
+  const acct=document.getElementById('acct'); acct.hidden=false; acct.textContent='سجّل دخول';
+  load(base+'firebase-app-compat.js').then(()=>Promise.all([load(base+'firebase-auth-compat.js'),load(base+'firebase-firestore-compat.js')])).then(()=>{
+    firebase.initializeApp(FIREBASE_CONFIG);
+    const auth=firebase.auth(), db=firebase.firestore();
+    let timer=null, applying=false;
+    const push=st=>{const u=auth.currentUser; if(!u||applying) return; clearTimeout(timer); timer=setTimeout(()=>{ db.collection('users').doc(u.uid).set({st:JSON.parse(JSON.stringify(st)),ts:Date.now(),name:u.displayName||''}).catch(()=>{}); },1500);};
+    window.__onSave=push;
+    auth.getRedirectResult().catch(()=>{});
+    auth.onAuthStateChanged(async u=>{
+      acct.textContent=u?'متزامن ✓':'سجّل دخول';
+      if(!u||!window.__app) return;
+      try{
+        const d=await db.collection('users').doc(u.uid).get(); const r=d.exists?d.data().st:null; const local=window.__app.get();
+        if(r&&(r.ts||0)>(local.ts||0)){ applying=true; window.__app.set(r); applying=false; } else push(local);
+      }catch(e){}
+    });
+    acct.onclick=()=>{
+      const u=auth.currentUser;
+      if(u){ if(acct.dataset.confirm==='1'){ auth.signOut(); acct.dataset.confirm=''; } else { acct.dataset.confirm='1'; acct.textContent='دوس تاني للخروج'; setTimeout(()=>{acct.dataset.confirm=''; if(auth.currentUser) acct.textContent='متزامن ✓';},3000); } return; }
+      const p=new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(p).catch(()=>auth.signInWithRedirect(p));
+    };
+  }).catch(()=>{acct.hidden=true;});
+})();
+</script>

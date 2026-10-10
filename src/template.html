@@ -1,0 +1,672 @@
+<title>أتعلم إنجليزي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Readex+Pro:wght@300;400;500;600&display=swap">
+<style>
+/* Layout: one narrow study column of ruled index cards, stats on top, tab bar pinned to the bottom */
+:root{
+  --bg:#E9EEF3; --surface:#FFFFFF; --card:#FFFDF8; --ink:#17202F; --muted:#5D6878; --line:#D5DDE7;
+  --rule:#BFD3EA; --margin:#D4483C; --accent:#21508F; --accent-ink:#FFFFFF; --soft:#DCE6F2;
+  --good:#1E7A4C; --good-bg:#DDF1E5; --bad:#B23A2E; --bad-bg:#F8E1DD;
+  --f-ui:"Readex Pro","Segoe UI",Tahoma,sans-serif; --f-en:"Fraunces",Georgia,"Times New Roman",serif;
+  --r:14px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#10151D; --surface:#18202B; --card:#1C2531; --ink:#E8EDF3; --muted:#9AA6B6; --line:#2C3746;
+  --rule:#2A3A50; --margin:#E06A5E; --accent:#7EAAE6; --accent-ink:#0E1520; --soft:#22324A;
+  --good:#6CCB98; --good-bg:#173527; --bad:#F08B80; --bad-bg:#3A1F1C; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10151D; --surface:#18202B; --card:#1C2531; --ink:#E8EDF3; --muted:#9AA6B6; --line:#2C3746;
+  --rule:#2A3A50; --margin:#E06A5E; --accent:#7EAAE6; --accent-ink:#0E1520; --soft:#22324A;
+  --good:#6CCB98; --good-bg:#173527; --bad:#F08B80; --bad-bg:#3A1F1C; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--f-ui);font-size:16px;line-height:1.6}
+.app{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:14px 110px;display:flex;flex-direction:column;gap:16px}
+.en{font-family:var(--f-en);direction:ltr;unicode-bidi:isolate}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;flex-direction:column}
+.brand b{font-size:1.15rem;font-weight:600}
+.brand small{color:var(--muted);font-size:.8rem}
+.speed{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:.82rem;white-space:nowrap}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 8px;text-align:center}
+.stat b{display:block;font-size:1.3rem;font-weight:600;font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:.78rem}
+
+h2{font-size:1.1rem;font-weight:600;margin:0;text-wrap:balance}
+.sub{color:var(--muted);font-size:.88rem;margin:0}
+.head{display:flex;flex-direction:column;gap:2px}
+
+/* index card */
+.cardwrap{display:flex;flex-direction:column;gap:12px}
+.prog{display:flex;gap:5px}
+.prog i{flex:1;height:5px;border-radius:3px;background:var(--line)}
+.prog i.on{background:var(--accent)}
+.prog i.cur{background:var(--margin)}
+.icard{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:0 10px 24px -14px rgba(20,35,60,.35);min-height:300px;padding:44px 22px 22px 22px;overflow:hidden;
+  background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 31px,var(--rule) 31px,var(--rule) 32px);
+  background-position:0 42px}
+.icard::before{content:"";position:absolute;top:0;bottom:0;right:44px;width:2px;background:var(--margin);opacity:.55}
+.icard::after{content:"";position:absolute;top:40px;left:0;right:0;height:2px;background:var(--margin);opacity:.35}
+.tag{position:absolute;top:10px;right:56px;left:14px;display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted)}
+.word{font-family:var(--f-en);font-weight:650;font-size:clamp(2.1rem,9vw,3rem);text-align:center;margin:26px 0 6px;direction:ltr;line-height:1.2;overflow-wrap:anywhere}
+.speak{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;font-size:.85rem}
+.speak svg{width:18px;height:18px}
+.center{display:flex;justify-content:center}
+.back{margin-top:18px;display:flex;flex-direction:column;gap:10px;text-align:center}
+.pron{color:var(--margin);font-size:1.5rem;font-weight:500}
+.mean{font-size:1.2rem;font-weight:500}
+.ex{background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:10px 12px;text-align:start;display:flex;flex-direction:column;gap:4px}
+.ex .e{font-family:var(--f-en);direction:ltr;text-align:left;font-size:1.02rem}
+.ex .a{color:var(--muted);font-size:.92rem}
+.ex .row{display:flex;justify-content:flex-end}
+
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{border:0;border-radius:12px;padding:13px 14px;font-weight:500;font-size:1rem}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:var(--surface);border:1px solid var(--line)}
+.btn.good{background:var(--good-bg);color:var(--good)}
+.btn.bad{background:var(--bad-bg);color:var(--bad)}
+.btn.wide{grid-column:1/-1}
+
+.empty{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:28px 20px;text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center}
+.empty .big{font-size:2.2rem;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums}
+
+/* quiz */
+.q{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px 18px;display:flex;flex-direction:column;gap:14px;text-align:center}
+.q .prompt{font-size:1.5rem;font-weight:600}
+.q .prompt.en{font-size:2rem}
+.opts{display:grid;gap:10px}
+.opt{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-align:start;font-size:1rem}
+.opt.en{text-align:left;font-size:1.1rem}
+.opt.right{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+.opt.wrong{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+
+/* rules & dictionary */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.panel>summary{list-style:none;padding:14px 16px;font-weight:600;display:flex;justify-content:space-between;gap:10px;cursor:pointer}
+.panel>summary::-webkit-details-marker{display:none}
+.panel>summary span{color:var(--muted);font-weight:400;font-size:.85rem;white-space:nowrap}
+.panel .intro{color:var(--muted);font-size:.88rem;padding:0 16px 8px;margin:0}
+.rrow{display:grid;grid-template-columns:auto 1fr auto;gap:4px 12px;align-items:center;padding:10px 16px;border-top:1px solid var(--line)}
+.chip{font-family:var(--f-en);direction:ltr;background:var(--soft);color:var(--accent);border-radius:8px;padding:2px 10px;font-weight:650;font-size:1.05rem;min-width:52px;text-align:center}
+.rrow .mid{min-width:0;display:flex;flex-direction:column}
+.rrow .mid small{color:var(--muted);font-size:.82rem}
+.rrow .mid .en{font-size:1.05rem}
+.iconbtn{border:1px solid var(--line);background:var(--card);border-radius:999px;width:38px;height:38px;display:inline-grid;place-items:center;flex:none}
+.iconbtn svg{width:18px;height:18px}
+
+.search{display:flex;flex-direction:column;gap:10px}
+.search input{width:100%;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:12px 14px;font:inherit}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.fchip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:.85rem}
+.fchip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.list{display:flex;flex-direction:column}
+.drow{display:grid;grid-template-columns:1fr;gap:2px 10px;padding:12px 4px;border-bottom:1px solid var(--line);align-items:center}
+.drow .w{display:flex;flex-direction:column;min-width:0}
+.drow .w .en{font-size:1.15rem;font-weight:650;display:flex;align-items:center;gap:8px}
+.drow .w .p{color:var(--margin)}
+.drow .w .m{font-size:.92rem}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--good);display:inline-block}
+.more{margin-top:12px}
+.prons{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pr{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.pr .lb{font-size:.75rem;color:var(--muted)}
+.pr .v{color:var(--margin);font-size:1.25rem;font-weight:500;overflow-wrap:anywhere}
+.pr.gb .v{color:var(--accent)}
+.pr .speak{padding:4px 10px;font-size:.78rem}
+.acc{display:flex;gap:6px;flex-wrap:wrap}
+.accb{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:3px 10px;font-size:.75rem;display:inline-flex;align-items:center;gap:4px}
+.accb svg{width:14px;height:14px}
+.drow .w .g{color:var(--accent)}
+.prow{padding:12px 4px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:4px}
+.prow .s{font-family:var(--f-en);direction:ltr;text-align:left;font-size:1.08rem;font-weight:650}
+.prow .l{font-size:.9rem;display:flex;gap:6px;flex-wrap:wrap}
+.prow .l b{font-weight:400;color:var(--muted);font-size:.78rem}
+.prow .l .us{color:var(--margin)} .prow .l .uk{color:var(--accent)}
+.prow .m{font-size:.92rem}
+.note{color:var(--muted);font-size:.8rem;text-align:center;margin:0}
+
+/* tab bar */
+.tabs{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--line);
+  padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;z-index:5}
+.tabs .in{display:grid;grid-template-columns:repeat(6,1fr);max-width:560px;width:100%}
+.tab{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;color:var(--muted);font-size:.74rem;border-radius:10px;position:relative}
+.tab svg{width:22px;height:22px}
+.tab[aria-selected="true"]{color:var(--accent);font-weight:600}
+.tab .badge{position:absolute;top:2px;left:calc(50% - 20px);background:var(--margin);color:#fff;border-radius:999px;font-size:.65rem;padding:0 5px;line-height:1.4;font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:no-preference){.icard,.q{animation:in .25s ease-out}@keyframes in{from{transform:translateY(6px);opacity:.6}to{transform:none;opacity:1}}}
+/* hubs & new exercises */
+.tabs .in{grid-template-columns:repeat(5,1fr)}
+.subbar{display:flex;align-items:center;gap:8px}
+.subbar button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:.85rem;display:inline-flex;align-items:center;gap:4px}
+.subbar span{color:var(--muted);font-size:.85rem}
+.hub{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 14px;text-align:start;display:flex;flex-direction:column;gap:6px;min-width:0}
+.tile svg{width:26px;height:26px;color:var(--accent)}
+.tile b{font-size:1rem;font-weight:600}
+.tile small{color:var(--muted);font-size:.8rem;line-height:1.5}
+.tile .meta{color:var(--margin);font-size:.75rem}
+@media (max-width:360px){.hub{grid-template-columns:1fr}}
+.modes{display:flex;gap:6px;flex-wrap:wrap}
+.dict-in{width:100%;border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:12px 14px;font-family:var(--f-en);font-size:1.25rem;direction:ltr;text-align:left}
+.dict-in.ok{border-color:var(--good)} .dict-in.no{border-color:var(--bad)}
+.cmp{display:flex;flex-direction:column;gap:4px;text-align:start}
+.cmp .row{display:flex;flex-direction:column;gap:2px;background:var(--surface);border-radius:10px;padding:8px 10px;border:1px solid var(--line)}
+.cmp .row small{color:var(--muted);font-size:.78rem}
+.cmp .row .en{font-size:1.1rem;text-align:left}
+.cmp .row .en .x{background:var(--bad-bg);color:var(--bad);border-radius:3px}
+.slot{min-height:64px;border:2px dashed var(--line);border-radius:12px;padding:8px;display:flex;flex-wrap:wrap;gap:6px;direction:ltr;align-content:flex-start}
+.slot.ok{border-color:var(--good);border-style:solid} .slot.no{border-color:var(--bad);border-style:solid}
+.pool{display:flex;flex-wrap:wrap;gap:6px;direction:ltr;justify-content:center}
+.wchip{font-family:var(--f-en);border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:6px 12px;font-size:1.05rem}
+.slot .wchip{background:var(--soft);border-color:transparent}
+.mic{width:84px;height:84px;border-radius:50%;border:0;background:var(--margin);color:#fff;display:grid;place-items:center;margin:0 auto}
+.mic svg{width:36px;height:36px}
+.mic.on{animation:pulse 1.1s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(212,72,60,.45)}100%{box-shadow:0 0 0 18px rgba(212,72,60,0)}}
+@media (prefers-reduced-motion:reduce){.mic.on{animation:none;outline:4px solid var(--margin)}}
+.verdict{border-radius:12px;padding:10px 12px;font-weight:500}
+.verdict.ok{background:var(--good-bg);color:var(--good)} .verdict.mid{background:var(--soft);color:var(--accent)} .verdict.no{background:var(--bad-bg);color:var(--bad)}
+.heard{font-family:var(--f-en);direction:ltr;font-size:1.05rem}
+/* lessons */
+.lrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 16px;border-top:1px solid var(--line);background:none;border-inline:0;border-bottom:0;width:100%;text-align:start}
+.lrow:first-child{border-top:0}
+.lrow .num{color:var(--muted);font-variant-numeric:tabular-nums;font-size:.85rem;min-width:22px}
+.lrow .tt{flex:1;min-width:0;font-weight:500}
+.lrow .sc{font-size:.78rem;border-radius:999px;padding:1px 9px;background:var(--soft);color:var(--accent);white-space:nowrap}
+.lrow .sc.full{background:var(--good-bg);color:var(--good)}
+.lesson{display:flex;flex-direction:column;gap:14px}
+.lesson p{margin:0;line-height:1.8}
+.pats{display:flex;flex-direction:column;gap:6px}
+.pat{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.pat .en{font-weight:650;font-size:1.08rem}
+.pat small{color:var(--muted)}
+.exl{display:flex;flex-direction:column;gap:8px}
+.exi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.exi .en{text-align:left;font-size:1.05rem;font-weight:650}
+.exi .us{color:var(--margin);font-size:.9rem} .exi .uk{color:var(--accent);font-size:.9rem}
+.exi .a{color:var(--muted);font-size:.9rem}
+.lq{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.lq .s{font-family:var(--f-en);direction:ltr;text-align:left;font-size:1.12rem}
+.lq .s u{text-decoration:none;border-bottom:2px solid var(--accent);padding:0 6px;color:var(--accent);font-weight:650}
+.lq .os{display:flex;gap:6px;flex-wrap:wrap;direction:ltr}
+.lq .o{font-family:var(--f-en);border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:6px 14px;font-size:1rem}
+.lq .o.right{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+.lq .o.wrong{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+.lq .h{color:var(--muted);font-size:.88rem}
+/* conversations */
+.chat{display:flex;flex-direction:column;gap:10px}
+.bub{max-width:88%;border-radius:16px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;border:1px solid var(--line)}
+.bub.r0{align-self:flex-start;background:var(--surface);border-start-start-radius:4px}
+.bub.r1{align-self:flex-end;background:var(--soft);border-start-end-radius:4px}
+.bub .who{font-size:.75rem;color:var(--muted)}
+.bub .en{text-align:left;font-size:1.04rem;font-weight:650}
+.bub .us{color:var(--margin);font-size:.86rem} .bub .uk{color:var(--accent);font-size:.86rem}
+.bub .a{font-size:.9rem}
+.bub.hide .en,.bub.hide .us,.bub.hide .uk{filter:blur(6px);user-select:none}
+.bub.playing{outline:2px solid var(--margin)}
+.row2{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.minib{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:3px 10px;font-size:.75rem}
+</style>
+
+<div class="app" dir="rtl" lang="ar" id="app">
+  <header class="top">
+    <div class="brand"><b>أتعلم إنجليزي</b><small>٤٠٤١ كلمة · ٥٠٠ جملة · ١٢ درس · ٨ محادثات</small></div>
+    <div class="row2"><button class="speed" id="acct" type="button" hidden>حسابي</button><button class="speed" id="speed" type="button">سرعة الصوت: عادي</button></div>
+  </header>
+  <section class="stats" aria-label="تقدمك">
+    <div class="stat"><b id="sLearned">٠</b><span>كلمة محفوظة</span></div>
+    <div class="stat"><b id="sDue">٠</b><span>للمراجعة النهاردة</span></div>
+    <div class="stat"><b id="sStreak">٠</b><span>أيام متتالية</span></div>
+  </section>
+  <div class="subbar" id="subbar" hidden><button id="backb" type="button"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>رجوع</button><span id="subt"></span></div>
+  <main id="view"></main>
+  <p class="note" id="voiceNote" hidden>الصوت مش متاح في المتصفح ده. جرب كروم أو سفاري.</p>
+</div>
+
+<nav class="tabs" dir="rtl" aria-label="الأقسام"><div class="in" role="tablist">
+  <button class="tab" role="tab" data-tab="today" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M8 13h8"/></svg>اليوم</button>
+  <button class="tab" role="tab" data-tab="review" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v4h4"/></svg>المراجعة<span class="badge" id="badge" hidden></span></button>
+  <button class="tab" role="tab" data-tab="practice" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></svg>تمارين</button>
+  <button class="tab" role="tab" data-tab="learn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h7a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H4zM20 5h-7a2 2 0 0 0-2 2"/><path d="M20 5v13h-7"/></svg>دروس</button>
+  <button class="tab" role="tab" data-tab="dict" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg>القاموس</button>
+</div></nav>
+
+<script type="application/json" id="data">__DATA__</script>
+<script>
+(function(){
+const D=JSON.parse(document.getElementById('data').textContent);
+const W=D.words, S=D.sections, R=D.rules;
+const AR='٠١٢٣٤٥٦٧٨٩'; const n=x=>String(x).replace(/\d/g,d=>AR[d]);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const INTERVALS=[0,1,3,7,14,30,60];
+const PER_DAY=10;
+const today=()=>{const d=new Date();return Math.floor((d.getTime()-d.getTimezoneOffset()*60000)/86400000)};
+const SPK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
+const PART=['','الجزء الأول','الجزء الثاني','الجزء الثالث','الجزء الرابع'];
+
+/* ---------- state ---------- */
+const KEY='eng-cards-v1';
+let st={p:{},next:0,plan:null,streak:0,last:null,slow:false};
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null'); if(s) st=Object.assign(st,s);}catch(e){}
+const save=()=>{st.ts=Date.now(); try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){} if(window.__onSave) window.__onSave(st);};
+function touchStreak(){const t=today(); if(st.last===t) return; st.streak=(st.last===t-1)?st.streak+1:1; st.last=t;}
+function ensurePlan(){
+  const t=today();
+  if(!st.plan||st.plan.day!==t){
+    const left=st.plan&&st.plan.day!==t?st.plan.queue.filter(i=>!st.p[i]):[];
+    const q=left.slice(0,PER_DAY);
+    while(q.length<PER_DAY&&st.next<W.length){ if(!st.p[st.next]) q.push(st.next); st.next++; }
+    st.plan={day:t,queue:q,done:[]}; save();
+  }
+}
+const dueList=()=>{const t=today();return Object.keys(st.p).map(Number).filter(i=>st.p[i][1]<=t)};
+function grade(i,ok){
+  const t=today(); const cur=st.p[i]||[0,t];
+  const box=ok?Math.min(cur[0]+1,INTERVALS.length-1):0;
+  st.p[i]=[box,t+(ok?INTERVALS[box]:0)];
+  touchStreak(); save();
+}
+
+/* ---------- speech ---------- */
+const synth=window.speechSynthesis; let voice=null, voiceGB=null;
+function pickVoice(){ if(!synth) return; const vs=synth.getVoices(); const L=v=>(v.lang||'').replace('_','-');
+  voice=vs.find(v=>L(v)==='en-US'&&/Samantha|Google US|Aria|Jenny|Ava/i.test(v.name))||vs.find(v=>L(v)==='en-US')||vs.find(v=>/^en/i.test(L(v)))||null;
+  voiceGB=vs.find(v=>L(v)==='en-GB'&&/Daniel|Google UK|Sonia|Libby|Serena|Kate/i.test(v.name))||vs.find(v=>L(v)==='en-GB')||null; }
+if(synth){ pickVoice(); synth.onvoiceschanged=pickVoice; } else document.getElementById('voiceNote').hidden=false;
+function say(text,acc){ if(!synth) return; try{ synth.cancel(); const u=new SpeechSynthesisUtterance(text); const gb=acc==='gb'; u.lang=gb?'en-GB':'en-US'; const v=gb?voiceGB:voice; if(v) u.voice=v; u.rate=st.slow?0.6:0.9; synth.speak(u);}catch(e){} }
+const speedBtn=document.getElementById('speed');
+const paintSpeed=()=>speedBtn.textContent='سرعة الصوت: '+(st.slow?'بطيء':'عادي');
+speedBtn.onclick=()=>{st.slow=!st.slow; save(); paintSpeed();}; paintSpeed();
+
+/* ---------- helpers ---------- */
+const view=document.getElementById('view');
+function secName(i){const t=S[W[i].s].t; const k=t.search(/[A-Za-z]/); return k<0?{a:t,x:''}:{a:t.slice(0,k).trim(),x:t.slice(k).trim()}}
+function stats(){
+  document.getElementById('sLearned').textContent=n(Object.values(st.p).filter(v=>v[0]>0).length);
+  const d=dueList().length; document.getElementById('sDue').textContent=n(d);
+  document.getElementById('sStreak').textContent=n(st.last!=null&&st.last>=today()-1?st.streak:0);
+  const b=document.getElementById('badge'); b.hidden=!d; b.textContent=n(d);
+}
+function cardHTML(i,{flipped,label,pos,total}){
+  const w=W[i]; const sec=secName(i);
+  let prog=''; if(total){prog='<div class="prog" aria-hidden="true">'+Array.from({length:total},(_,k)=>`<i class="${k<pos?'on':k===pos?'cur':''}"></i>`).join('')+'</div>';}
+  return `<div class="cardwrap">${prog}
+  <article class="icard" aria-live="polite">
+    <div class="tag"><span>${esc(label)}</span><span>${esc(PART[w.part])} · ${n(total?pos+1:'')}${total?' من '+n(total):''}</span></div>
+    <div class="word" lang="en">${esc(w.w)}</div>
+    <div class="center">${accBtns(w.w)}</div>
+    ${flipped?`<div class="back">
+      ${pronBox(w.p,w.b||w.p,w.w)}
+      <div class="mean">${esc(w.m)}</div>
+      ${w.e?`<div class="ex"><span class="e" lang="en">${esc(w.e)}</span><span class="a">${esc(w.ea)}</span><span class="row">${accBtns(w.e)}</span></div>`:''}
+      <p class="sub">${esc(sec.a)}</p>${sec.x?`<p class="sub en">${esc(sec.x)}</p>`:''}
+    </div>`:''}
+  </article></div>`;
+}
+view.addEventListener('click',e=>{const b=e.target.closest('[data-say]'); if(b) say(b.dataset.say,b.dataset.acc);});
+const accBtns=t=>`<span class="acc"><button class="accb" type="button" data-say="${esc(t)}">${SPK}أمريكي</button><button class="accb" type="button" data-acc="gb" data-say="${esc(t)}">${SPK}بريطاني</button></span>`;
+const pronBox=(us,gb,t)=>`<div class="prons"><div class="pr"><span class="lb">النطق الأمريكي</span><span class="v">${esc(us)}</span><button class="speak" type="button" data-say="${esc(t)}">${SPK}اسمع</button></div><div class="pr gb"><span class="lb">النطق البريطاني</span><span class="v">${esc(gb)}</span><button class="speak" type="button" data-acc="gb" data-say="${esc(t)}">${SPK}اسمع</button></div></div>`;
+
+/* ---------- today ---------- */
+let flip=false;
+function renderToday(){
+  ensurePlan(); const pl=st.plan; const rest=pl.queue.filter(i=>!pl.done.includes(i));
+  if(!rest.length){
+    view.innerHTML=`<div class="empty"><div class="big">${n(pl.done.length)}</div><h2>خلصت كلمات النهاردة</h2>
+      <p class="sub">الكلمات دي هترجعلك في المراجعة بكرة. لو عندك وقت، اعمل اختبار سريع.</p>
+      <div class="actions" style="width:100%"><button class="btn primary" data-go="quiz" type="button">تمرين سريع</button><button class="btn ghost" id="moreW" type="button">١٠ كلمات كمان</button></div></div>`;
+    view.querySelector('[data-go]').onclick=()=>openSub('practice','quiz');
+    view.querySelector('#moreW').onclick=()=>{const q=[];while(q.length<PER_DAY&&st.next<W.length){if(!st.p[st.next])q.push(st.next);st.next++;} pl.queue.push(...q); save(); renderToday();};
+    return;
+  }
+  const i=rest[0]; const pos=pl.done.length;
+  view.innerHTML=`<div class="head"><h2>كلمات النهاردة</h2><p class="sub">اسمع الكلمة وحاول تفتكر معناها قبل ما تقلب الكارت.</p></div>`+
+    cardHTML(i,{flipped:flip,label:'كلمة جديدة',pos,total:pl.queue.length})+
+    (flip?`<div class="actions"><button class="btn bad" id="again" type="button">لسه مش حافظها</button><button class="btn good" id="ok" type="button">حفظتها</button></div>`
+         :`<div class="actions"><button class="btn primary wide" id="flip" type="button">اقلب الكارت</button></div>`);
+  if(!flip){ view.querySelector('#flip').onclick=()=>{flip=true;renderToday();}; }
+  else{
+    view.querySelector('#ok').onclick=()=>{grade(i,true);pl.done.push(i);flip=false;save();stats();renderToday();};
+    view.querySelector('#again').onclick=()=>{pl.queue.splice(pl.queue.indexOf(i),1);pl.queue.push(i);flip=false;save();renderToday();};
+  }
+}
+
+/* ---------- review ---------- */
+let rq=null;
+function renderReview(){
+  if(!rq||!rq.length) rq=dueList().sort((a,b)=>st.p[a][0]-st.p[b][0]);
+  if(!rq.length){
+    const nextDay=Math.min(...Object.values(st.p).map(v=>v[1]).filter(d=>d>today()),Infinity);
+    view.innerHTML=`<div class="empty"><h2>مفيش مراجعة دلوقتي</h2><p class="sub">${Object.keys(st.p).length?(isFinite(nextDay)?'المراجعة الجاية بعد '+n(nextDay-today())+' يوم.':''):'لما تحفظ كلمات من قسم اليوم، هترجعلك هنا في مواعيد محسوبة عشان متنساهاش.'}</p>
+      <button class="btn primary" data-go="today" type="button">روح لكلمات النهاردة</button></div>`;
+    view.querySelector('[data-go]').onclick=()=>go('today'); return;
+  }
+  const i=rq[0];
+  view.innerHTML=`<div class="head"><h2>المراجعة</h2><p class="sub">فاضل ${n(rq.length)} كلمة. الكلمة اللي تنساها هترجعلك أسرع.</p></div>`+
+    cardHTML(i,{flipped:flip,label:'مراجعة · المستوى '+n(st.p[i][0]),pos:0,total:0})+
+    (flip?`<div class="actions"><button class="btn bad" id="again" type="button">نسيتها</button><button class="btn good" id="ok" type="button">فاكرها</button></div>`
+         :`<div class="actions"><button class="btn primary wide" id="flip" type="button">اقلب الكارت</button></div>`);
+  if(!flip) view.querySelector('#flip').onclick=()=>{flip=true;renderReview();};
+  else{
+    view.querySelector('#ok').onclick=()=>{grade(i,true);rq.shift();flip=false;stats();renderReview();};
+    view.querySelector('#again').onclick=()=>{grade(i,false);rq.shift();rq.push(i);flip=false;stats();renderReview();};
+  }
+}
+
+/* ---------- quiz ---------- */
+let qz=null;
+const shuffle=a=>{for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a};
+function newQuiz(){
+  let pool=Object.keys(st.p).map(Number);
+  const from=pool.length>=6?'كلماتك المحفوظة':'أول ٦٠ كلمة';
+  if(pool.length<6) pool=Array.from({length:60},(_,k)=>k);
+  const qs=shuffle(pool.slice()).slice(0,Math.min(10,pool.length)).map(i=>{
+    const dir=Math.random()<.5?'en':'ar';
+    const same=W.map((_,k)=>k).filter(k=>k!==i&&W[k].part===W[i].part&&W[k].m!==W[i].m&&W[k].w!==W[i].w);
+    const opts=shuffle([i,...shuffle(same).slice(0,3)]);
+    return {i,dir,opts};
+  });
+  qz={qs,k:0,score:0,picked:null,from};
+}
+function renderQuiz(){
+  if(!qz) newQuiz();
+  if(qz.k>=qz.qs.length){
+    view.innerHTML=`<div class="empty"><div class="big">${n(qz.score)} / ${n(qz.qs.length)}</div><h2>${qz.score>=8?'ممتاز':'كويس، كمل تمرين'}</h2>
+      <p class="sub">الكلمات اللي غلطت فيها اتضافت لمراجعة النهاردة.</p><button class="btn primary" id="again" type="button">اختبار جديد</button></div>`;
+    view.querySelector('#again').onclick=()=>{qz=null;renderQuiz();}; return;
+  }
+  const q=qz.qs[qz.k]; const w=W[q.i];
+  const prompt=q.dir==='en'?`<div class="prompt en" lang="en">${esc(w.w)}</div><div class="center">${accBtns(w.w)}</div><p class="sub">اختار المعنى الصح</p>`
+                         :`<div class="prompt">${esc(w.m)}</div><p class="sub">اختار الكلمة الإنجليزي الصح</p>`;
+  const opts=q.opts.map(o=>{let cls='opt'+(q.dir==='ar'?' en':''); if(qz.picked!=null){ if(o===q.i) cls+=' right'; else if(o===qz.picked) cls+=' wrong'; }
+    return `<button class="${cls}" type="button" data-o="${o}" ${qz.picked!=null?'disabled':''} ${q.dir==='ar'?'lang="en"':''}>${esc(q.dir==='en'?W[o].m:W[o].w)}</button>`}).join('');
+  view.innerHTML=`<div class="head"><h2>اختبار</h2><p class="sub">سؤال ${n(qz.k+1)} من ${n(qz.qs.length)} · من ${esc(qz.from)}</p></div>
+    <div class="q">${prompt}<div class="opts">${opts}</div>
+    ${qz.picked!=null?`<div class="back"><div class="en" style="font-size:1.3rem">${esc(w.w)}</div>${pronBox(w.p,w.b||w.p,w.w)}<div class="mean">${esc(w.m)}</div></div><button class="btn primary" id="nx" type="button">السؤال اللي بعده</button>`:''}</div>`;
+  view.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{const o=+b.dataset.o; qz.picked=o; if(o===q.i){qz.score++;} else if(st.p[q.i]){grade(q.i,false);stats();} say(w.w); renderQuiz();});
+  const nx=view.querySelector('#nx'); if(nx) nx.onclick=()=>{qz.k++;qz.picked=null;renderQuiz();};
+}
+
+/* ---------- rules ---------- */
+function renderRules(){
+  view.innerHTML=`<div class="head"><h2>قواعد النطق</h2><p class="sub">القواعد دي مكتوبة للنطق الأمريكي. اضغط على أي قاعدة تفتحها واسمع الأمثلة.</p></div>`+
+  R.map((g,k)=>`<details class="panel" ${k===0?'open':''}><summary>${esc(g.t)}<span>${n(g.rows.length)} مثال</span></summary>`+
+    g.rows.map(r=>`<div class="rrow"><span class="chip">${esc(r[0])}</span><div class="mid"><span class="en">${esc(r[2])}</span><small>الصوت: ${esc(r[1])} · النطق: ${esc(r[3])} · ${esc(r[4])}</small></div><button class="iconbtn" type="button" aria-label="اسمع" data-say="${esc(r[2])}">${SPK}</button></div>`).join('')+
+  `</details>`).join('');
+}
+
+/* ---------- dictionary ---------- */
+let dq='',dpart=0,dlim=60;
+function renderDict(){
+  view.innerHTML=`<div class="head"><h2>القاموس</h2><p class="sub">دور بالإنجليزي أو بالعربي في كل الكلمات.</p></div>
+  <div class="search"><input id="dqi" type="search" placeholder="اكتب كلمة..." value="${esc(dq)}" autocomplete="off">
+  <div class="chips">${['الكل',...PART.slice(1)].map((t,k)=>`<button class="fchip" type="button" data-p="${k}" aria-pressed="${dpart===k}">${t}</button>`).join('')}</div></div>
+  <div class="list" id="dl"></div>`;
+  const inp=view.querySelector('#dqi');
+  inp.oninput=()=>{dq=inp.value;dlim=60;paintDict();};
+  view.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{dpart=+b.dataset.p;dlim=60;renderDict();});
+  paintDict();
+}
+function paintDict(){
+  const q=dq.trim().toLowerCase();
+  const res=[]; for(let i=0;i<W.length;i++){const w=W[i]; if(dpart&&w.part!==dpart) continue; if(q&&!(w.w.toLowerCase().includes(q)||w.m.includes(q))) continue; res.push(i);}
+  const dl=document.getElementById('dl');
+  dl.innerHTML=`<p class="sub" style="padding:8px 4px">${n(res.length)} كلمة</p>`+res.slice(0,dlim).map(i=>{const w=W[i];const known=st.p[i]&&st.p[i][0]>0;
+    return `<div class="drow"><div class="w"><span class="en">${esc(w.w)}${known?'<span class="dot" title="محفوظة"></span>':''}</span><span class="p">أمريكي: ${esc(w.p)}</span><span class="g">بريطاني: ${esc(w.b||w.p)}</span><span class="m">${esc(w.m)}</span>${accBtns(w.w)}</div></div>`}).join('')+
+    (res.length>dlim?`<button class="btn ghost more" id="dmore" type="button">اعرض كلمات أكتر</button>`:'');
+  const m=document.getElementById('dmore'); if(m) m.onclick=()=>{dlim+=100;paintDict();};
+}
+
+/* ---------- phrases ---------- */
+const P=D.phr; let pq='',psec=0,plim=50;
+function renderPhr(){
+  view.innerHTML=`<div class="head"><h2>جمل يومية</h2><p class="sub">${n(P.items.length)} جملة للكلام اليومي والشغل، وكل جملة بالنطقين.</p></div>
+  <div class="search"><input id="pqi" type="search" placeholder="دور على جملة..." value="${esc(pq)}" autocomplete="off">
+  <div class="chips">${['الكل',...P.secs].map((t,k)=>`<button class="fchip" type="button" data-ps="${k}" aria-pressed="${psec===k}">${esc(t)}</button>`).join('')}</div></div>
+  <div class="list" id="pl"></div>`;
+  const inp=view.querySelector('#pqi'); inp.oninput=()=>{pq=inp.value;plim=50;paintPhr();};
+  view.querySelectorAll('[data-ps]').forEach(b=>b.onclick=()=>{psec=+b.dataset.ps;plim=50;renderPhr();});
+  paintPhr();
+}
+function paintPhr(){
+  const q=pq.trim().toLowerCase(); const res=P.items.filter(x=>(!psec||x.s===psec-1)&&(!q||x.en.toLowerCase().includes(q)||x.m.includes(q)));
+  const pl=document.getElementById('pl');
+  pl.innerHTML=`<p class="sub" style="padding:8px 4px">${n(res.length)} جملة</p>`+res.slice(0,plim).map(x=>`<div class="prow"><span class="s" lang="en">${esc(x.en)}</span>
+    <span class="m">${esc(x.m)}</span><span class="l"><b>أمريكي</b><span class="us">${esc(x.p)}</span></span><span class="l"><b>بريطاني</b><span class="uk">${esc(x.b)}</span></span>${accBtns(x.en.replace(/\.\.\./g,''))}</div>`).join('')+
+    (res.length>plim?`<button class="btn ghost more" id="pmore" type="button">اعرض جمل أكتر</button>`:'');
+  const m=document.getElementById('pmore'); if(m) m.onclick=()=>{plim+=100;paintPhr();};
+}
+
+/* ---------- shared helpers for exercises ---------- */
+const norm=s=>String(s).toLowerCase().replace(/[’']/g,"'").replace(/[^a-z0-9' ]+/g,' ').replace(/\s+/g,' ').trim();
+const ICON={
+ quiz:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6M12 17h.01"/></svg>',
+ dict:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 18v-5a9 9 0 0 1 18 0v5"/><rect x="3" y="15" width="4" height="6" rx="1"/><rect x="17" y="15" width="4" height="6" rx="1"/></svg>',
+ order:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="7" height="6" rx="1.5"/><rect x="14" y="4" width="7" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/></svg>',
+ speak:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
+ gram:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h7a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H4zM20 5h-7a2 2 0 0 0-2 2"/><path d="M20 5v13h-7"/></svg>',
+ conv:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h11v8H8l-4 3z"/><path d="M15 9h5v8l-3-2h-6v-2"/></svg>',
+ phr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v10H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>',
+ rules:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>'
+};
+const MIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
+function learnedPool(min,fallback){ let p=Object.keys(st.p).map(Number); if(p.length<min) p=Array.from({length:fallback},(_,k)=>k); return p; }
+const PHR_SHORT=()=>D.phr.items.filter(x=>!x.en.includes('...')&&x.en.split(' ').length>=3&&x.en.split(' ').length<=8);
+function roundDone(score,total,again){
+  view.innerHTML=`<div class="empty"><div class="big">${n(score)} / ${n(total)}</div><h2>${score>=total*0.8?'ممتاز':'كويس، كمل تمرين'}</h2>
+    <p class="sub">الكلمات اللي غلطت فيها من محفوظاتك اتضافت لمراجعة النهاردة.</p><button class="btn primary" id="again" type="button">جولة جديدة</button></div>`;
+  view.querySelector('#again').onclick=again;
+}
+
+/* ---------- dictation: listen and write ---------- */
+let dc=null, dcMode='w';
+function newDict(){
+  let items;
+  if(dcMode==='w'){ items=shuffle(learnedPool(10,150).filter(i=>/^[A-Za-z][A-Za-z ]*$/.test(W[i].w))).slice(0,10).map(i=>({t:W[i].w,p:W[i].p,b:W[i].b||W[i].p,m:W[i].m,i})); }
+  else { items=shuffle(PHR_SHORT()).slice(0,10).map(x=>({t:x.en,p:x.p,b:x.b,m:x.m})); }
+  dc={items,k:0,score:0,ans:null};
+}
+function diffHTML(target,typed){
+  const a=target.split(' '), b=norm(typed).split(' ');
+  return a.map((w,k)=>norm(w)===(b[k]||'')?esc(w):`<span class="x">${esc(w)}</span>`).join(' ');
+}
+function renderDictation(){
+  if(!dc) newDict();
+  if(dc.k>=dc.items.length) return roundDone(dc.score,dc.items.length,()=>{dc=null;renderDictation();});
+  const it=dc.items[dc.k]; const done=dc.ans!=null; const ok=done&&norm(dc.ans)===norm(it.t);
+  view.innerHTML=`<div class="head"><h2>اسمع واكتب</h2><p class="sub">اسمع وبعدين اكتب اللي سمعته بالإنجليزي. ده بيقوي الإملاء والحروف الصامتة.</p></div>
+  <div class="modes"><button class="fchip" type="button" data-m="w" aria-pressed="${dcMode==='w'}">كلمات</button><button class="fchip" type="button" data-m="s" aria-pressed="${dcMode==='s'}">جمل</button></div>
+  <div class="q"><p class="sub">${n(dc.k+1)} من ${n(dc.items.length)}</p>
+    <div class="actions"><button class="btn primary" type="button" data-say="${esc(it.t)}">${SPK} اسمع</button><button class="btn ghost" type="button" id="slow">اسمع ببطء</button></div>
+    <input class="dict-in ${done?(ok?'ok':'no'):''}" id="dcin" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="اكتب هنا" lang="en" ${done?'disabled':''} value="${esc(dc.ans||'')}">
+    ${done?`<div class="verdict ${ok?'ok':'no'}">${ok?'صح':'فيه غلط'}</div>
+      <div class="cmp"><div class="row"><small>الصح</small><span class="en">${diffHTML(it.t,dc.ans)}</span></div>
+      <div class="row"><small>النطق الأمريكي</small><span>${esc(it.p)}</span></div><div class="row"><small>المعنى</small><span>${esc(it.m)}</span></div></div>
+      <button class="btn primary" id="nx" type="button">اللي بعده</button>`
+    :`<button class="btn primary" id="chk" type="button">صحح</button>`}
+  </div>`;
+  view.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{dcMode=b.dataset.m;dc=null;renderDictation();});
+  view.querySelector('#slow').onclick=()=>{const s=st.slow; st.slow=true; say(it.t); st.slow=s;};
+  if(!done){
+    const inp=view.querySelector('#dcin');
+    const check=()=>{ if(!inp.value.trim()) {inp.focus();return;} dc.ans=inp.value; if(norm(dc.ans)===norm(it.t)) dc.score++; else if(it.i!=null&&st.p[it.i]){grade(it.i,false);stats();} renderDictation(); };
+    view.querySelector('#chk').onclick=check; inp.onkeydown=e=>{if(e.key==='Enter')check();};
+    if(dc.k===0&&!dc.played){dc.played=true;}
+  } else view.querySelector('#nx').onclick=()=>{dc.k++;dc.ans=null;renderDictation(); setTimeout(()=>say(dc.items[dc.k]&&dc.items[dc.k].t||''),150);};
+}
+
+/* ---------- sentence ordering ---------- */
+let od=null;
+function newOrder(){
+  const pool=[...PHR_SHORT().map(x=>({t:x.en,m:x.m})), ...W.filter(w=>w.e&&w.e.split(' ').length>=3&&w.e.split(' ').length<=9).map(w=>({t:w.e,m:w.ea}))];
+  const items=shuffle(pool).slice(0,10).map(x=>{const toks=x.t.replace(/[.!?]+$/,'').split(' '); let sh; let g=0; do{sh=shuffle(toks.map((w,k)=>({w,k})));g++;}while(sh.every((o,k)=>o.w===toks[k])&&g<10); return {...x,toks,sh,ans:[],done:false};});
+  od={items,k:0,score:0};
+}
+function renderOrder(){
+  if(!od) newOrder();
+  if(od.k>=od.items.length) return roundDone(od.score,od.items.length,()=>{od=null;renderOrder();});
+  const it=od.items[od.k]; const used=new Set(it.ans);
+  const ok=it.done&&it.ans.map(k=>it.sh[k].w).join(' ')===it.toks.join(' ');
+  view.innerHTML=`<div class="head"><h2>رتب الجملة</h2><p class="sub">دوس على الكلمات بالترتيب الصح عشان تكوّن الجملة. ودوس على أي كلمة فوق ترجعها.</p></div>
+  <div class="q"><p class="sub">${n(od.k+1)} من ${n(od.items.length)}</p><div class="prompt" style="font-size:1.2rem">${esc(it.m)}</div>
+    <div class="slot ${it.done?(ok?'ok':'no'):''}" id="slot">${it.ans.map((k,j)=>`<button class="wchip" type="button" data-back="${j}" ${it.done?'disabled':''}>${esc(it.sh[k].w)}</button>`).join('')}</div>
+    <div class="pool">${it.sh.map((o,k)=>used.has(k)?'':`<button class="wchip" type="button" data-pick="${k}" ${it.done?'disabled':''}>${esc(o.w)}</button>`).join('')}</div>
+    ${it.done?`<div class="verdict ${ok?'ok':'no'}">${ok?'صح':'الترتيب الصح'}</div>${ok?'':`<div class="en" style="font-size:1.1rem">${esc(it.t)}</div>`}<div class="center">${accBtns(it.t)}</div><button class="btn primary" id="nx" type="button">الجملة اللي بعدها</button>`
+     :`<div class="actions"><button class="btn ghost" id="clr" type="button">امسح</button><button class="btn primary" id="chk" type="button" ${it.ans.length<it.sh.length?'disabled':''}>صحح</button></div>`}
+  </div>`;
+  view.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{it.ans.push(+b.dataset.pick);renderOrder();});
+  view.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{it.ans.splice(+b.dataset.back,1);renderOrder();});
+  const c=view.querySelector('#clr'); if(c) c.onclick=()=>{it.ans=[];renderOrder();};
+  const k=view.querySelector('#chk'); if(k) k.onclick=()=>{it.done=true; if(it.ans.map(x=>it.sh[x].w).join(' ')===it.toks.join(' ')) od.score++; say(it.t); renderOrder();};
+  const nx=view.querySelector('#nx'); if(nx) nx.onclick=()=>{od.k++;renderOrder();};
+}
+
+/* ---------- speaking with the microphone ---------- */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let sp=null, spMode='w', rec=null;
+function listen(target,cb){
+  if(!SR) return cb({err:'none'});
+  try{ rec=new SR(); rec.lang='en-US'; rec.interimResults=false; rec.maxAlternatives=5;
+    let got=false;
+    rec.onresult=e=>{got=true; cb({alts:Array.from(e.results[0]).map(a=>a.transcript)});};
+    rec.onerror=e=>{got=true; cb({err:e.error||'x'});};
+    rec.onend=()=>{ if(!got) cb({err:'no-speech'}); rec=null; };
+    rec.start();
+  }catch(e){ cb({err:'x'}); }
+}
+function judge(target,alts){
+  const t=norm(target); if(alts.some(a=>norm(a)===t)) return {lv:'ok',heard:alts[0]};
+  const tw=t.split(' '); let best=0, heard=alts[0]||'';
+  alts.forEach(a=>{const aw=new Set(norm(a).split(' ')); const hit=tw.filter(w=>aw.has(w)).length/tw.length; if(hit>best){best=hit;heard=a;}});
+  return {lv:best>=0.7?'mid':'no',heard};
+}
+function newSpeak(){
+  const items=spMode==='w'?shuffle(learnedPool(10,100)).slice(0,10).map(i=>({t:W[i].w,p:W[i].p,b:W[i].b||W[i].p,m:W[i].m})):shuffle(PHR_SHORT()).slice(0,10).map(x=>({t:x.en,p:x.p,b:x.b,m:x.m}));
+  sp={items,k:0,res:null,busy:false,err:null};
+}
+const MICERR={'not-allowed':'المايك مش مسموح هنا. التمرين ده هيشتغل لما نرفع التطبيق وتفتحه من كروم وتسمح بالمايك.','service-not-allowed':'المايك مش مسموح هنا. التمرين ده هيشتغل لما نرفع التطبيق وتفتحه من كروم وتسمح بالمايك.','none':'المتصفح ده مبيدعمش التعرف على الصوت. افتح التطبيق من كروم.','no-speech':'مسمعتش حاجة. قرب الموبايل وجرب تاني.','audio-capture':'مفيش مايك شغال على الجهاز ده.','network':'التعرف على الصوت محتاج إنترنت. اتأكد من الاتصال.'};
+function renderSpeak(){
+  if(!sp) newSpeak();
+  const it=sp.items[sp.k]; const r=sp.res;
+  view.innerHTML=`<div class="head"><h2>انطق</h2><p class="sub">اسمع النطق، وبعدين دوس على المايك وقول الكلمة بصوت واضح.</p></div>
+  <div class="modes"><button class="fchip" type="button" data-m="w" aria-pressed="${spMode==='w'}">كلمات</button><button class="fchip" type="button" data-m="s" aria-pressed="${spMode==='s'}">جمل</button></div>
+  <div class="q"><p class="sub">${n(sp.k+1)} من ${n(sp.items.length)}</p>
+    <div class="prompt en" lang="en" style="${spMode==='s'?'font-size:1.4rem':''}">${esc(it.t)}</div>
+    <div class="sub">${esc(it.m)}</div>
+    ${pronBox(it.p,it.b,it.t)}
+    <button class="mic ${sp.busy?'on':''}" id="mic" type="button" aria-label="سجل صوتك">${MIC}</button>
+    <p class="sub">${sp.busy?'بسمعك دلوقتي...':'دوس على المايك واتكلم'}</p>
+    ${sp.err?`<div class="verdict no">${esc(MICERR[sp.err]||'حصلت مشكلة في المايك. جرب تاني.')}</div>`:''}
+    ${r?`<div class="verdict ${r.lv}">${r.lv==='ok'?'نطقك صح':r.lv==='mid'?'قريب جدًا، جرب تاني':'مش واضح، اسمع النطق وجرب تاني'}</div><div class="sub">سمعتك بتقول</div><div class="heard">${esc(r.heard||'')}</div>`:''}
+    <div class="actions"><button class="btn ghost" id="skip" type="button">اللي بعده</button><button class="btn ghost" id="rep" type="button">جرب تاني</button></div>
+  </div>`;
+  view.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{spMode=b.dataset.m;sp=null;renderSpeak();});
+  view.querySelector('#mic').onclick=()=>{ if(sp.busy) return; if(synth) synth.cancel(); sp.busy=true; sp.err=null; sp.res=null; renderSpeak();
+    listen(it.t,res=>{ sp.busy=false; if(res.err) sp.err=res.err; else sp.res=judge(it.t,res.alts); renderSpeak(); }); };
+  view.querySelector('#skip').onclick=()=>{ sp.k=(sp.k+1)%sp.items.length; if(sp.k===0) newSpeak(); sp.res=null; sp.err=null; renderSpeak(); };
+  view.querySelector('#rep').onclick=()=>{ sp.res=null; sp.err=null; renderSpeak(); };
+}
+
+/* ---------- grammar lessons ---------- */
+const L=D.les; let lessonOpen=null, lans={};
+if(!st.les) st.les={};
+function renderLessons(){
+  if(lessonOpen==null){
+    view.innerHTML=`<div class="head"><h2>دروس القواعد</h2><p class="sub">${n(L.length)} درس قصير بالترتيب. كل درس فيه شرح وأمثلة وتمرين من ٥ أسئلة.</p></div>
+    <div class="panel">${L.map((l,k)=>{const sc=st.les[k]; return `<button class="lrow" type="button" data-l="${k}"><span class="num">${n(k+1)}</span><span class="tt">${esc(l.t)}</span>${sc!=null?`<span class="sc ${sc===l.q.length?'full':''}">${n(sc)} من ${n(l.q.length)}</span>`:''}</button>`}).join('')}</div>`;
+    view.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>{lessonOpen=+b.dataset.l;lans={};renderLessons();window.scrollTo(0,0);});
+    return;
+  }
+  const l=L[lessonOpen]; const answered=Object.keys(lans).length; const score=Object.entries(lans).filter(([q,a])=>l.q[q][2]===a).length;
+  view.innerHTML=`<div class="lesson"><div class="head"><p class="sub">الدرس ${n(lessonOpen+1)} من ${n(L.length)}</p><h2>${esc(l.t)}</h2></div>
+    ${l.x.map(p=>`<p>${esc(p)}</p>`).join('')}
+    <div class="pats">${l.pat.map(p=>Array.isArray(p)?`<div class="pat"><span class="en">${esc(p[0])}</span><small>${esc(p[1])}</small></div>`:`<div class="pat"><span class="en">${esc(p)}</span></div>`).join('')}</div>
+    <h2>أمثلة</h2>
+    <div class="exl">${l.ex.map(e=>`<div class="exi"><span class="en">${esc(e[0])}</span><span class="a">${esc(e[1])}</span><span class="us">أمريكي: ${esc(e[2])}</span><span class="uk">بريطاني: ${esc(e[3])}</span>${accBtns(e[0])}</div>`).join('')}</div>
+    <h2>تمرين</h2>
+    ${l.q.map((q,qi)=>{const a=lans[qi]; const parts=q[0].split('___');
+      return `<div class="lq"><span class="s">${esc(parts[0])}<u>${a!=null?esc(q[1][a]):'&nbsp;?&nbsp;'}</u>${esc(parts[1]||'')}</span>
+      <div class="os">${q[1].map((o,oi)=>{let c='o'; if(a!=null){ if(oi===q[2]) c+=' right'; else if(oi===a) c+=' wrong'; } return `<button class="${c}" type="button" data-q="${qi}" data-o="${oi}" ${a!=null?'disabled':''}>${esc(o)}</button>`}).join('')}</div>
+      ${a!=null?`<span class="h">${esc(q[3])}</span>`:''}</div>`}).join('')}
+    ${answered===l.q.length?`<div class="verdict ${score===l.q.length?'ok':'mid'}">نتيجتك ${n(score)} من ${n(l.q.length)}</div>`:''}
+    <div class="actions"><button class="btn ghost" id="lback" type="button">كل الدروس</button>${lessonOpen<L.length-1?`<button class="btn primary" id="lnext" type="button">الدرس اللي بعده</button>`:''}</div>
+  </div>`;
+  view.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{const qi=+b.dataset.q; lans[qi]=+b.dataset.o; const filled=l.q[qi][0].replace('___',l.q[qi][1][l.q[qi][2]]); say(filled);
+    if(Object.keys(lans).length===l.q.length){ const sc=Object.entries(lans).filter(([q,a])=>l.q[q][2]===a).length; st.les[lessonOpen]=Math.max(st.les[lessonOpen]||0,sc); touchStreak(); save(); stats(); }
+    const y=window.scrollY; renderLessons(); window.scrollTo(0,y);});
+  view.querySelector('#lback').onclick=()=>{lessonOpen=null;renderLessons();};
+  const nx=view.querySelector('#lnext'); if(nx) nx.onclick=()=>{lessonOpen++;lans={};renderLessons();window.scrollTo(0,0);};
+}
+
+/* ---------- conversations ---------- */
+const C=D.con; let convOpen=null, convRole=-1, revealed=new Set(), playing=-1, convRes={};
+function sayLine(text,onend){ if(!synth) return onend&&onend(); try{ synth.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang='en-US'; if(voice) u.voice=voice; u.rate=st.slow?0.6:0.9; u.onend=()=>onend&&onend(); u.onerror=()=>onend&&onend(); synth.speak(u);}catch(e){onend&&onend();} }
+function renderConvos(){
+  if(convOpen==null){
+    view.innerHTML=`<div class="head"><h2>محادثات</h2><p class="sub">مواقف من الشغل والحياة اليومية. اسمع المحادثة، وبعدين اختار دورك واتمرن على الرد.</p></div>
+    <div class="panel">${C.map((c,k)=>`<button class="lrow" type="button" data-c="${k}"><span class="num">${n(k+1)}</span><span class="tt">${esc(c.t)}</span><span class="sc">${n(c.l.length)} جمل</span></button>`).join('')}</div>`;
+    view.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{convOpen=+b.dataset.c;convRole=-1;revealed=new Set();convRes={};renderConvos();window.scrollTo(0,0);});
+    return;
+  }
+  const c=C[convOpen];
+  view.innerHTML=`<div class="head"><h2>${esc(c.t)}</h2><p class="sub">${convRole<0?'اقرا واسمع المحادثة. ولما تكون جاهز، اختار دورك.':'جملك مستخبية. اقرا المعنى، وحاول تقولها بالإنجليزي، وبعدين اكشفها أو انطقها في المايك.'}</p></div>
+  <div class="modes"><button class="fchip" type="button" data-r="-1" aria-pressed="${convRole<0}">قراءة</button>${c.r.map((r,k)=>`<button class="fchip" type="button" data-r="${k}" aria-pressed="${convRole===k}">أنا ${esc(r)}</button>`).join('')}</div>
+  <button class="btn primary" id="playall" type="button">${playing>=0?'وقف':'اسمع المحادثة كلها'}</button>
+  <div class="chat">${c.l.map((l,k)=>{const mine=convRole===l[0]; const hide=mine&&!revealed.has(k); const res=convRes[k];
+    return `<div class="bub r${l[0]} ${hide?'hide':''} ${playing===k?'playing':''}"><span class="who">${esc(c.r[l[0]])}</span>
+      <span class="en">${esc(l[1])}</span><span class="a">${esc(l[2])}</span>
+      <span class="us">أمريكي: ${esc(l[3])}</span><span class="uk">بريطاني: ${esc(l[4])}</span>
+      <span class="row2">${hide?`<button class="minib" type="button" data-rev="${k}">اكشف الجملة</button>`:accBtns(l[1])}${mine?`<button class="minib" type="button" data-mic="${k}">انطقها</button>`:''}</span>
+      ${res?`<div class="verdict ${res.lv||'no'}">${res.err?esc(MICERR[res.err]||'حصلت مشكلة في المايك.'):res.lv==='ok'?'نطقك صح':res.lv==='mid'?'قريب جدًا':'جرب تاني'}</div>`:''}</div>`}).join('')}</div>
+  <div class="actions"><button class="btn ghost" id="cback" type="button">كل المحادثات</button>${convOpen<C.length-1?`<button class="btn primary" id="cnext" type="button">المحادثة اللي بعدها</button>`:''}</div>`;
+  view.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{convRole=+b.dataset.r;revealed=new Set();convRes={};renderConvos();});
+  view.querySelectorAll('[data-rev]').forEach(b=>b.onclick=()=>{const k=+b.dataset.rev; revealed.add(k); say(c.l[k][1]); renderConvos();});
+  view.querySelectorAll('[data-mic]').forEach(b=>b.onclick=()=>{const k=+b.dataset.mic; b.textContent='بسمعك...'; listen(c.l[k][1],res=>{convRes[k]=res.err?{err:res.err}:judge(c.l[k][1],res.alts); if(!res.err) revealed.add(k); renderConvos();});});
+  view.querySelector('#playall').onclick=()=>{ if(playing>=0){playing=-1; if(synth) synth.cancel(); renderConvos(); return;}
+    const step=k=>{ if(playing<0||convOpen==null) return; if(k>=c.l.length){playing=-1;renderConvos();return;} playing=k; renderConvos(); sayLine(c.l[k][1],()=>setTimeout(()=>{ if(playing===k) step(k+1); },350)); };
+    playing=0; step(0); };
+  view.querySelector('#cback').onclick=()=>{convOpen=null;playing=-1;if(synth)synth.cancel();renderConvos();};
+  const nx=view.querySelector('#cnext'); if(nx) nx.onclick=()=>{convOpen++;convRole=-1;revealed=new Set();convRes={};playing=-1;renderConvos();window.scrollTo(0,0);};
+}
+
+/* ---------- hubs ---------- */
+const HUBS={
+ practice:{t:'تمارين',sub:'اختار التمرين اللي عايزه. كل جولة ١٠ أسئلة.',items:[
+  {k:'quiz',t:'معنى الكلمة',d:'اختيار من متعدد بين العربي والإنجليزي',f:()=>renderQuiz()},
+  {k:'dict',t:'اسمع واكتب',d:'تسمع الكلمة أو الجملة وتكتبها',f:()=>renderDictation()},
+  {k:'order',t:'رتب الجملة',d:'تكوّن الجملة من كلمات متلخبطة',f:()=>renderOrder()},
+  {k:'speak',t:'انطق',d:'تقول الكلمة في المايك ويقولك نطقك صح ولا لأ',f:()=>renderSpeak()}]},
+ learn:{t:'دروس',sub:'القواعد والمحادثات والجمل الجاهزة.',items:[
+  {k:'gram',t:'دروس القواعد',d:'١٢ درس من فعل يكون لحد أدوات السؤال',f:()=>renderLessons(),meta:()=>{const d=Object.keys(st.les||{}).length;return d?n(d)+' درس خلصته':''}},
+  {k:'conv',t:'محادثات',d:'مواقف الشغل والمطعم والدكتور والمطار',f:()=>renderConvos()},
+  {k:'phr',t:'جمل يومية',d:'٥٠٠ جملة جاهزة بالنطقين',f:()=>renderPhr()},
+  {k:'rules',t:'قواعد النطق',d:'الحروف المركبة والصامتة وملامح الأمريكي',f:()=>renderRules()}]}
+};
+let curTab='today', sub={practice:null,learn:null};
+const subbar=document.getElementById('subbar');
+function renderHub(name){
+  const h=HUBS[name]; const s=sub[name];
+  if(s){ const it=h.items.find(x=>x.k===s); subbar.hidden=false; document.getElementById('subt').textContent=it.t; it.f(); return; }
+  subbar.hidden=true;
+  view.innerHTML=`<div class="head"><h2>${h.t}</h2><p class="sub">${h.sub}</p></div><div class="hub">${h.items.map(it=>`<button class="tile" type="button" data-sub="${it.k}">${ICON[it.k]}<b>${it.t}</b><small>${it.d}</small>${it.meta&&it.meta()?`<span class="meta">${it.meta()}</span>`:''}</button>`).join('')}</div>`;
+  view.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{sub[name]=b.dataset.sub; renderHub(name); window.scrollTo(0,0);});
+}
+document.getElementById('backb').onclick=()=>{ if(synth) synth.cancel(); playing=-1; sub[curTab]=null; lessonOpen=null; convOpen=null; renderHub(curTab); window.scrollTo(0,0); };
+function openSub(tab,k){ sub[tab]=k; go(tab); }
+
+/* ---------- tabs ---------- */
+const views={today:renderToday,review:renderReview,practice:()=>renderHub('practice'),learn:()=>renderHub('learn'),dict:renderDict};
+function go(t){flip=false; curTab=t; playing=-1; if(synth) synth.cancel(); if(t==='review') rq=null; subbar.hidden=true; document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t)); views[t](); try{sessionStorage.setItem('eng-tab',t)}catch(e){} window.scrollTo(0,0);}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{ if(b.dataset.tab===curTab&&HUBS[curTab]){ sub[curTab]=null; lessonOpen=null; convOpen=null; } go(b.dataset.tab); });
+window.__app={get:()=>st,set:r=>{st=Object.assign(st,r); try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){} paintSpeed(); stats(); go(curTab);}};
+stats();
+let start='today'; const h=(location.hash||'').slice(1); if(views[h]) start=h; else {try{const s=sessionStorage.getItem('eng-tab'); if(views[s]) start=s;}catch(e){}}
+go(start);
+})();
+</script>
