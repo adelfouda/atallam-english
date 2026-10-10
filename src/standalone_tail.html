@@ -3,7 +3,7 @@
 </div>
 <script>
 /* PWA: offline + install */
-if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{})); }
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{})); }
 (function(){
   const bar=document.getElementById('installBar'), btn=document.getElementById('installBtn'), txt=document.getElementById('installTxt');
   let dismissed=false; try{dismissed=localStorage.getItem('atallam-install-x')==='1'}catch(e){}

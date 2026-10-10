@@ -2,9 +2,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#21508F">
 <meta name="description" content="تعلم الإنجليزي بالنطق الأمريكي والبريطاني: كلمات يومية، مراجعة، تمارين، دروس قواعد، ومحادثات.">
-<link rel="manifest" href="/manifest.webmanifest">
-<link rel="icon" href="/icons/icon-192.png">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="أتعلم إنجليزي">
@@ -687,7 +687,7 @@ go(start);
 </div>
 <script>
 /* PWA: offline + install */
-if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{})); }
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{})); }
 (function(){
   const bar=document.getElementById('installBar'), btn=document.getElementById('installBtn'), txt=document.getElementById('installTxt');
   let dismissed=false; try{dismissed=localStorage.getItem('atallam-install-x')==='1'}catch(e){}
