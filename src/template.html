@@ -181,6 +181,24 @@ h2{font-size:1.1rem;font-weight:600;margin:0;text-wrap:balance}
 .lrow .sc{font-size:.78rem;border-radius:999px;padding:1px 9px;background:var(--soft);color:var(--accent);white-space:nowrap}
 .lrow .sc.full{background:var(--good-bg);color:var(--good)}
 .lesson{display:flex;flex-direction:column;gap:14px}
+.story{display:flex;flex-direction:column;gap:12px}
+.lvh{margin:6px 0 0;font-size:1rem;color:var(--muted);font-weight:600}
+.sen{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.sen.playing{border-color:var(--accent);box-shadow:0 0 0 2px var(--soft)}
+.sen .en{font-family:var(--f-en);direction:ltr;text-align:left;font-size:1.12rem;line-height:1.9}
+.sen .us{color:var(--margin);font-size:.9rem} .sen .a{font-size:.95rem}
+.tw{cursor:pointer;border-bottom:1px dotted var(--muted);padding:0 1px}
+.tw:active{background:var(--soft)}
+.lq .qa{font-weight:500} .lq .os.ar{direction:rtl}
+.wpop{position:fixed;inset:0;z-index:25;background:rgba(0,0,0,.35);display:flex;align-items:flex-end;justify-content:center}
+.wpop .in{background:var(--surface);width:100%;max-width:560px;border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px}
+.wpop .en{font-family:var(--f-en);direction:ltr;text-align:left;font-size:1.6rem}
+.wpop .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.wpop .btn svg{width:18px;height:18px;flex:none}
+.wpop .mean{font-size:1.15rem} .wpop .pp{color:var(--margin)} .wpop .pp.gb{color:var(--accent)}
+.tipbar{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--soft);border-radius:12px;padding:10px 12px;font-size:.92rem}
+.gcode{font-family:var(--f-en);letter-spacing:.15em;font-size:1.2rem;direction:ltr}
+.brow .av{font-size:1.4rem} .brow.me{background:var(--soft)}
 .lesson p{margin:0;line-height:1.8}
 .pats{display:flex;flex-direction:column;gap:6px}
 .pat{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
@@ -436,7 +454,7 @@ function startKid(ME){
   function burst(){ if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; const b=document.createElement('div'); b.className='burst';
     for(let k=0;k<14;k++){const i=document.createElement('i'); i.textContent=['⭐','🌟','✨'][k%3]; i.style.left='50%'; i.style.top='45%'; i.style.setProperty('--dx',(Math.random()*300-150)+'px'); i.style.setProperty('--dy',(Math.random()*-300+40)+'px'); b.appendChild(i);}
     document.body.appendChild(b); setTimeout(()=>b.remove(),1200); }
-  function addStars(k){ ks.stars+=k; ksave(); const s=document.getElementById('kstars'); if(s) s.textContent=n(ks.stars); }
+  function addStars(k){ ks.stars+=k; const w=Math.floor((today()-3)/7); if(!ks.pts||ks.pts.wk!==w) ks.pts={wk:w,v:0}; ks.pts.v+=k; ksave(); const s=document.getElementById('kstars'); if(s) s.textContent=n(ks.stars); }
   const head=()=>`<div class="khead"><div class="hi"><button class="avbtn" type="button" id="kswitch" aria-label="تغيير المستخدم">${ME.av}</button><b>أهلًا يا ${esc(ME.name)}</b></div><button class="stars" type="button" id="kstarsb">⭐ <span id="kstars">${n(ks.stars)}</span></button></div>`;
   const wire=()=>{ root.querySelector('#kswitch').onclick=openPicker; root.querySelector('#kstarsb').onclick=showBadges; const b=root.querySelector('#kback'); if(b) b.onclick=b._go; };
   let curBack=null; backFn=()=>curBack;
@@ -576,6 +594,7 @@ function grade(i,ok){
   const t=today(); const cur=st.p[i]||[0,t];
   if(!st.hist) st.hist={};
   if(ok&&cur[0]===0) st.hist[t]=(st.hist[t]||0)+1;
+  if(ok) addPts(cur[0]===0?3:1);
   const box=ok?Math.min(cur[0]+1,INTERVALS.length-1):0;
   st.p[i]=[box,t+(ok?INTERVALS[box]:0)];
   touchStreak(); save();
@@ -634,10 +653,12 @@ function renderToday(){
     return;
   }
   const i=rest[0]; const pos=pl.done.length;
-  view.innerHTML=`<div class="head"><h2>كلمات النهاردة</h2><p class="sub">اسمع الكلمة وحاول تفتكر معناها قبل ما تقلب الكارت.</p></div>`+
+  const fresh=!st.placed&&!Object.keys(st.p).length&&pos===0;
+  view.innerHTML=(fresh?`<div class="tipbar"><span>جديد هنا؟ اعمل اختبار المستوى عشان تبدأ من مستواك.</span><button class="minib" id="gotest" type="button">ابدأ الاختبار</button></div>`:'')+`<div class="head"><h2>كلمات النهاردة</h2><p class="sub">اسمع الكلمة وحاول تفتكر معناها قبل ما تقلب الكارت.</p></div>`+
     cardHTML(i,{flipped:flip,label:'كلمة جديدة',pos,total:pl.queue.length})+
     (flip?`<div class="actions"><button class="btn bad" id="again" type="button">لسه مش حافظها</button><button class="btn good" id="ok" type="button">حفظتها</button></div>`
          :`<div class="actions"><button class="btn primary wide" id="flip" type="button">اقلب الكارت</button></div>`);
+  const gt=view.querySelector('#gotest'); if(gt) gt.onclick=()=>openSub('learn','test');
   if(!flip){ view.querySelector('#flip').onclick=()=>{flip=true;renderToday();}; }
   else{
     view.querySelector('#ok').onclick=()=>{grade(i,true);pl.done.push(i);flip=false;save();stats();renderToday();};
@@ -762,6 +783,9 @@ const ICON={
  conv:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h11v8H8l-4 3z"/><path d="M15 9h5v8l-3-2h-6v-2"/></svg>',
  phr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v10H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>',
  prog:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+ sto:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h10l3 3v15H6z"/><path d="M9 8h6M9 12h7M9 16h4"/><path d="M3 6v15h3"/></svg>',
+ test:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg>',
+ board:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 21h8M9 17h6v4H9z"/></svg>',
  rules:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>'
 };
 const MIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
@@ -907,7 +931,7 @@ function renderLessons(){
     <div class="actions"><button class="btn ghost" id="lback" type="button">كل الدروس</button>${lessonOpen<L.length-1?`<button class="btn primary" id="lnext" type="button">الدرس اللي بعده</button>`:''}</div>
   </div>`;
   view.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{const qi=+b.dataset.q; lans[qi]=+b.dataset.o; const filled=l.q[qi][0].replace('___',l.q[qi][1][l.q[qi][2]]); say(filled);
-    if(Object.keys(lans).length===l.q.length){ const sc=Object.entries(lans).filter(([q,a])=>l.q[q][2]===a).length; st.les[lessonOpen]=Math.max(st.les[lessonOpen]||0,sc); touchStreak(); save(); stats(); }
+    if(Object.keys(lans).length===l.q.length){ const sc=Object.entries(lans).filter(([q,a])=>l.q[q][2]===a).length; if(st.les[lessonOpen]==null) addPts(5+sc); st.les[lessonOpen]=Math.max(st.les[lessonOpen]||0,sc); touchStreak(); save(); stats(); }
     const y=window.scrollY; renderLessons(); window.scrollTo(0,y);});
   view.querySelector('#lback').onclick=()=>{lessonOpen=null;renderLessons();};
   const nx=view.querySelector('#lnext'); if(nx) nx.onclick=()=>{lessonOpen++;lans={};renderLessons();window.scrollTo(0,0);};
@@ -944,6 +968,144 @@ function renderConvos(){
   const nx=view.querySelector('#cnext'); if(nx) nx.onclick=()=>{convOpen++;convRole=-1;revealed=new Set();convRes={};playing=-1;renderConvos();window.scrollTo(0,0);};
 }
 
+/* ---------- weekly points ---------- */
+const wk=()=>Math.floor((today()-3)/7);
+function addPts(k){ if(!st.pts||st.pts.wk!==wk()) st.pts={wk:wk(),v:0}; st.pts.v+=k; }
+const weekPts=()=>st.pts&&st.pts.wk===wk()?st.pts.v:0;
+
+/* ---------- word lookup ---------- */
+const WIDX={}; W.forEach((w,i)=>{const k=w.w.toLowerCase(); if(!(k in WIDX)) WIDX[k]=i;});
+const IRR={been:'be',went:'go',gone:'go',ate:'eat',eaten:'eat',took:'take',taken:'take',came:'come',made:'make',said:'say',felt:'feel',met:'meet',built:'build',swam:'swim',brought:'bring',told:'tell',had:'have',has:'have',found:'find',sent:'send',thought:'think',got:'get',children:'child',men:'man',women:'woman',was:'be',were:'be',is:'be',are:'be',am:'be',did:'do',does:'do',saw:'see',seen:'see',gave:'give',given:'give',left:'leave',kept:'keep',slept:'sleep',bought:'buy',spent:'spend',began:'begin',knew:'know',known:'know',wrote:'write',written:'write',drove:'drive',ran:'run',sat:'sit',stood:'stand',understood:'understand',paid:'pay',heard:'hear',lost:'lose',taught:'teach',caught:'catch',chose:'choose',spoke:'speak',woke:'wake',became:'become',better:'good',best:'good',worse:'bad',worst:'bad'};
+function lookup(t){
+  let w=t.toLowerCase().replace(/'s$|’s$/,'').replace(/n't$/,''); if(w in WIDX) return WIDX[w];
+  if(IRR[w]&&IRR[w] in WIDX) return WIDX[IRR[w]];
+  const tries=[];
+  if(w.endsWith('ies')) tries.push(w.slice(0,-3)+'y'); if(w.endsWith('ied')) tries.push(w.slice(0,-3)+'y');
+  if(w.endsWith('es')) tries.push(w.slice(0,-2)); if(w.endsWith('s')) tries.push(w.slice(0,-1));
+  if(w.endsWith('ed')){ tries.push(w.slice(0,-2),w.slice(0,-1)); if(w[w.length-3]===w[w.length-4]) tries.push(w.slice(0,-3)); }
+  if(w.endsWith('ing')){ tries.push(w.slice(0,-3),w.slice(0,-3)+'e'); if(w[w.length-4]===w[w.length-5]) tries.push(w.slice(0,-4)); }
+  if(w.endsWith('ly')) tries.push(w.slice(0,-2)); if(w.endsWith('ily')) tries.push(w.slice(0,-3)+'y');
+  if(w.endsWith('er')) tries.push(w.slice(0,-2),w.slice(0,-1)); if(w.endsWith('est')) tries.push(w.slice(0,-3));
+  for(const x of tries) if(x in WIDX) return WIDX[x];
+  return -1;
+}
+function wordPop(t){
+  const i=lookup(t); let el=document.getElementById('wpop'); if(!el){el=document.createElement('div');el.id='wpop';el.className='wpop';el.dir='rtl';document.body.appendChild(el);}
+  const close=()=>el.remove();
+  if(i<0){ el.innerHTML=`<div class="in"><b class="en">${esc(t)}</b><p class="sub">الكلمة دي مش في القاموس.</p><div class="actions"><button class="btn ghost" type="button" data-say="${esc(t)}">${SPK}اسمع</button><button class="btn primary" type="button" id="wpx">تمام</button></div></div>`; }
+  else { const w=W[i], has=!!st.p[i];
+    el.innerHTML=`<div class="in"><b class="en">${esc(w.w)}</b><span class="mean">${esc(w.m)}</span>
+      <span class="pp">أمريكي: ${esc(w.p)}</span><span class="pp gb">بريطاني: ${esc(w.b||w.p)}</span>
+      <div class="actions"><button class="btn ghost" type="button" data-say="${esc(w.w)}">${SPK}اسمع</button><button class="btn ${has?'ghost':'primary'}" type="button" id="wpadd" ${has?'disabled':''}>${has?'موجودة في مراجعتك':'ضيفها للمراجعة'}</button></div>
+      <button class="btn ghost wide" type="button" id="wpx">قفل</button></div>`;
+    const a=el.querySelector('#wpadd'); if(!has) a.onclick=()=>{ st.p[i]=[0,today()]; save(); stats(); a.textContent='اتضافت ✓'; a.disabled=true; a.className='btn ghost'; };
+  }
+  el.querySelector('#wpx').onclick=close; el.onclick=e=>{ if(e.target===el) close(); const b=e.target.closest('[data-say]'); if(b) say(b.dataset.say); };
+  say(i<0?t:W[i].w);
+}
+
+/* ---------- stories ---------- */
+const STO=D.sto; const LV=['','المستوى الأول: مبتدئ','المستوى التاني: فوق المبتدئ','المستوى التالت: متوسط'];
+let stoOpen=null, stoAr=false, stoAns={}, stoPlay=-1;
+if(!st.sto) st.sto={};
+const tapWords=en=>esc(en).replace(/[A-Za-z]+(?:'[A-Za-z]+)?/g,m=>`<span class="tw" data-w="${m}">${m}</span>`);
+function renderStories(){
+  if(stoOpen==null){
+    view.innerHTML=`<div class="head"><h2>قصص قصيرة</h2><p class="sub">اقرا واسمع. دوس على أي كلمة تعرف معناها ونطقها، وتقدر تضيفها لمراجعتك.</p></div>
+    ${[1,2,3].map(lv=>`<h3 class="lvh">${LV[lv]}</h3><div class="panel">${STO.map((s,k)=>s.lv!==lv?'':`<button class="lrow" type="button" data-s="${k}"><span class="num">${s.e}</span><span class="tt">${esc(s.t)}</span>${st.sto[k]!=null?`<span class="sc ${st.sto[k]===s.q.length?'full':''}">${n(st.sto[k])} من ${n(s.q.length)}</span>`:''}</button>`).join('')}</div>`).join('')}`;
+    view.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{stoOpen=+b.dataset.s;stoAns={};stoPlay=-1;renderStories();window.scrollTo(0,0);});
+    return;
+  }
+  const s=STO[stoOpen]; const done=Object.keys(stoAns).length===s.q.length, score=Object.entries(stoAns).filter(([q,a])=>s.q[q][2]===a).length;
+  view.innerHTML=`<div class="story"><div class="head"><p class="sub">${LV[s.lv]}</p><h2>${s.e} ${esc(s.t)}</h2></div>
+    <div class="actions"><button class="btn primary" id="splay" type="button">${stoPlay>=0?'وقف':'اسمع القصة كلها'}</button><button class="btn ghost" id="sar" type="button">${stoAr?'خبّي الترجمة':'اعرض الترجمة'}</button></div>
+    ${s.s.map((x,k)=>`<div class="sen ${stoPlay===k?'playing':''}"><span class="en" lang="en">${tapWords(x[0])}</span>
+      <span class="us">${esc(x[2])}</span>${stoAr?`<span class="a">${esc(x[1])}</span>`:''}<span class="row2">${accBtns(x[0])}</span></div>`).join('')}
+    <h2>أسئلة على القصة</h2>
+    ${s.q.map((q,qi)=>{const a=stoAns[qi]; return `<div class="lq"><span class="qa">${esc(q[0])}</span><div class="os ar">${q[1].map((o,oi)=>{let c='o'; if(a!=null){ if(oi===q[2]) c+=' right'; else if(oi===a) c+=' wrong'; } return `<button class="${c}" type="button" data-q="${qi}" data-o="${oi}" ${a!=null?'disabled':''}>${esc(o)}</button>`}).join('')}</div></div>`}).join('')}
+    ${done?`<div class="verdict ${score===s.q.length?'ok':'mid'}">نتيجتك ${n(score)} من ${n(s.q.length)}</div>`:''}
+    <div class="actions"><button class="btn ghost" id="sback" type="button">كل القصص</button>${stoOpen<STO.length-1?`<button class="btn primary" id="snext" type="button">القصة اللي بعدها</button>`:''}</div></div>`;
+  view.querySelectorAll('.tw').forEach(t=>t.onclick=()=>wordPop(t.dataset.w));
+  view.querySelector('#sar').onclick=()=>{stoAr=!stoAr; const y=window.scrollY; renderStories(); window.scrollTo(0,y);};
+  view.querySelector('#splay').onclick=()=>{ if(stoPlay>=0){stoPlay=-1; if(synth) synth.cancel(); renderStories(); return;}
+    const cur=stoOpen; const step=k=>{ if(stoPlay<0||stoOpen!==cur) return; if(k>=s.s.length){stoPlay=-1;renderStories();return;} stoPlay=k; const y=window.scrollY; renderStories(); window.scrollTo(0,y); const el=view.querySelectorAll('.sen')[k]; if(el&&el.scrollIntoView) el.scrollIntoView({block:'center',behavior:'smooth'}); sayLine(s.s[k][0],()=>setTimeout(()=>{ if(stoPlay===k) step(k+1); },400)); };
+    stoPlay=0; step(0); };
+  view.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{ const qi=+b.dataset.q; stoAns[qi]=+b.dataset.o;
+    if(Object.keys(stoAns).length===s.q.length){ const sc=Object.entries(stoAns).filter(([q,a])=>s.q[q][2]===a).length; if(st.sto[stoOpen]==null) addPts(5+sc); st.sto[stoOpen]=Math.max(st.sto[stoOpen]||0,sc); touchStreak(); save(); stats(); }
+    const y=window.scrollY; renderStories(); window.scrollTo(0,y); });
+  view.querySelector('#sback').onclick=()=>{stoOpen=null;stoPlay=-1;if(synth)synth.cancel();renderStories();};
+  const nx=view.querySelector('#snext'); if(nx) nx.onclick=()=>{stoOpen++;stoAns={};stoPlay=-1;if(synth)synth.cancel();renderStories();window.scrollTo(0,0);};
+}
+
+/* ---------- placement test ---------- */
+const BANDS=[[0,400],[400,1000],[1000,2000],[2000,3000],[3000,W.length]];
+const LVNAME=['مبتدئ','فوق المبتدئ','متوسط','فوق المتوسط','متقدم'];
+let pt=null;
+function newTest(){
+  const qs=[];
+  BANDS.forEach(([a,b],bi)=>{ const pool=shuffle(Array.from({length:b-a},(_,k)=>a+k).filter(i=>!W[i].w.includes(' '))); const picked=[];
+    for(const i of pool){ if(picked.length>=4) break; if(!picked.some(j=>W[j].m===W[i].m)) picked.push(i); }
+    picked.forEach(i=>{ const others=shuffle(pool.filter(j=>j!==i&&W[j].m!==W[i].m)).slice(0,3); qs.push({t:'v',band:bi,i,opts:shuffle([i,...others])}); }); });
+  [0,2,4,6,8,10].forEach(li=>{ const L0=D.les[li]; const q=L0.q[Math.floor(Math.random()*L0.q.length)]; qs.push({t:'g',li,q}); });
+  pt={qs,k:0,ans:[]};
+}
+function renderTest(){
+  if(!pt){
+    view.innerHTML=`<div class="empty"><div class="big">🎯</div><h2>اختبار المستوى</h2><p class="sub">٢٦ سؤال سريع، حوالي ٥ دقايق. بنعرف منه الكلمات اللي إنت عارفها، فتبدأ من مستواك بدل ما تبدأ من الأول، وبنقولك تبدأ من أنهي درس قواعد.</p>
+      ${st.placed?`<p class="sub">آخر نتيجة: ${LVNAME[st.placed.lv]}</p>`:''}<button class="btn primary" id="tgo" type="button">ابدأ الاختبار</button></div>`;
+    view.querySelector('#tgo').onclick=()=>{newTest();renderTest();}; return;
+  }
+  if(pt.k<pt.qs.length){
+    const q=pt.qs[pt.k];
+    const body=q.t==='v'?`<div class="word" lang="en" style="text-align:center">${esc(W[q.i].w)}</div><p class="sub" style="text-align:center">معناها إيه؟</p>
+      <div class="opts">${q.opts.map(o=>`<button class="opt" type="button" data-o="${o}">${esc(W[o].m)}</button>`).join('')}<button class="opt idk" type="button" data-o="-1">مش عارف</button></div>`
+      :`<div class="lq"><span class="s">${esc(q.q[0])}</span><span class="h">${esc(q.q[3])}</span><div class="os">${q.q[1].map((o,oi)=>`<button class="o" type="button" data-o="${oi}">${esc(o)}</button>`).join('')}</div></div>`;
+    view.innerHTML=`<div class="head"><p class="sub">سؤال ${n(pt.k+1)} من ${n(pt.qs.length)} · ${q.t==='v'?'كلمات':'قواعد'}</p><div class="goalbar"><i style="width:${pt.k/pt.qs.length*100}%"></i></div></div>${body}`;
+    view.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{ const o=+b.dataset.o; pt.ans.push(q.t==='v'?o===q.i:o===q.q[2]); pt.k++; renderTest(); });
+    return;
+  }
+  const vb=BANDS.map((_,bi)=>pt.qs.map((q,k)=>q.t==='v'&&q.band===bi?pt.ans[k]:null).filter(x=>x!=null));
+  let lv=0; for(let bi=0;bi<BANDS.length;bi++){ if(vb[bi].filter(Boolean).length>=3) lv=bi+1; else break; }
+  const gq=pt.qs.map((q,k)=>[q,pt.ans[k]]).filter(x=>x[0].t==='g'); const firstWrong=gq.find(x=>!x[1]); const startLes=firstWrong?firstWrong[0].li:null;
+  const skip=lv?BANDS[lv-1][1]:0, gram=gq.filter(x=>x[1]).length;
+  view.innerHTML=`<div class="empty"><div class="big">${LVNAME[Math.min(lv,4)]}</div><h2>نتيجة الاختبار</h2>
+    <div class="tot" style="width:100%">${BANDS.map((b,bi)=>`<div class="stat"><b>${n(vb[bi].filter(Boolean).length)} من ${n(vb[bi].length)}</b><span>كلمات ${n(b[0]+1)} لـ ${n(b[1])}</span></div>`).join('')}<div class="stat"><b>${n(gram)} من ${n(gq.length)}</b><span>قواعد</span></div></div>
+    <p class="sub">${skip?`إنت عارف أغلب أول ${n(skip)} كلمة. نقترح تبدأ الكلمات الجديدة من بعدها.`:'نقترح تبدأ الكلمات من الأول، خطوة خطوة.'} ${startLes!=null?`وفي القواعد ابدأ من الدرس ${n(startLes+1)}: ${esc(D.les[startLes].t)}.`:'والقواعد الأساسية عندك كويسة.'}</p>
+    <div class="actions" style="width:100%">${skip>st.next?`<button class="btn primary" id="tapply" type="button">ابدأ الكلمات من مستواي</button>`:''}${startLes!=null?`<button class="btn ghost" id="tles" type="button">افتح الدرس</button>`:''}<button class="btn ghost" id="tagain" type="button">اعيد الاختبار</button></div></div>`;
+  st.placed={lv:Math.min(lv,4),skip,les:startLes,d:today()}; save();
+  const ap=view.querySelector('#tapply'); if(ap) ap.onclick=()=>{ st.next=skip; if(st.plan) st.plan.queue=st.plan.queue.filter(i=>i>=skip||st.p[i]); st.plan=null; save(); ap.textContent='تمام ✓ كلماتك الجديدة هتبدأ من كلمة '+n(skip+1); ap.disabled=true; };
+  const tl=view.querySelector('#tles'); if(tl) tl.onclick=()=>{ lessonOpen=startLes; lans={}; openSub('learn','gram'); };
+  view.querySelector('#tagain').onclick=()=>{newTest();renderTest();};
+}
+
+/* ---------- friends leaderboard ---------- */
+let brd={list:null,err:null,busy:false,join:false};
+const GKEY='eng-group';
+function renderBoard(){
+  const B=window.__board, g=lsGet(GKEY,null);
+  if(!B){ view.innerHTML=`<div class="empty"><div class="big">🏆</div><h2>مسابقة الأصدقاء</h2><p class="sub">المسابقة محتاجة تسجيل دخول بجوجل، وهتشتغل أول ما نفعّله في التطبيق.</p></div>`; return; }
+  if(!B.user()){ view.innerHTML=`<div class="empty"><div class="big">🏆</div><h2>مسابقة الأصدقاء</h2><p class="sub">سجّل دخول بجوجل عشان تتسابق مع صحابك وعيلتك كل أسبوع، وكمان تقدمك يتحفظ وتكمل من أي جهاز.</p><button class="btn primary" id="bsign" type="button">سجّل دخول بجوجل</button></div>`;
+    view.querySelector('#bsign').onclick=()=>B.signIn(); return; }
+  if(!g){
+    view.innerHTML=`<div class="head"><h2>مسابقة الأصدقاء</h2><p class="sub">اعمل مجموعة وابعت الكود لصحابك، أو ادخل بكود حد بعتهولك. النقط بتتصفر كل يوم أحد.</p></div>
+      <button class="btn primary wide" id="bnew" type="button">اعمل مجموعة جديدة</button>
+      <div class="panel" style="padding:14px 16px;display:flex;flex-direction:column;gap:10px"><label for="bcode">أو اكتب كود المجموعة</label><input id="bcode" class="dict-in" maxlength="8" autocomplete="off" autocapitalize="characters"><button class="btn ghost" id="bjoin" type="button">ادخل المجموعة</button>${brd.err?`<div class="verdict no">${esc(brd.err)}</div>`:''}</div>`;
+    view.querySelector('#bnew').onclick=()=>{ const c=Array.from({length:6},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)]).join(''); lsSet(GKEY,c); brd.list=null; B.publish(); renderBoard(); };
+    view.querySelector('#bjoin').onclick=()=>{ const c=view.querySelector('#bcode').value.trim().toUpperCase().replace(/[^A-Z0-9]/g,''); if(c.length<4){brd.err='الكود قصير، اتأكد منه';renderBoard();return;} brd.err=null; lsSet(GKEY,c); brd.list=null; B.publish(); renderBoard(); };
+    return;
+  }
+  if(brd.list==null&&!brd.busy){ brd.busy=true; B.load(g,wk()).then(l=>{brd.list=l;brd.err=null;}).catch(()=>{brd.list=[];brd.err='مقدرناش نجيب الترتيب. اتأكد من النت.';}).finally(()=>{brd.busy=false; if(curTab==='learn'&&sub.learn==='board') renderBoard();}); }
+  const me=B.user().uid, L=(brd.list||[]).slice().sort((a,b)=>b.pts-a.pts);
+  view.innerHTML=`<div class="head"><h2>مسابقة الأصدقاء</h2><p class="sub">ترتيب الأسبوع ده. النقط من الكلمات والمراجعة والدروس والقصص، ونجوم الأطفال.</p></div>
+    <div class="panel" style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px"><span>كود المجموعة</span><b class="gcode">${esc(g)}</b><button class="minib" id="bshare" type="button">ابعته</button></div>
+    ${brd.busy&&!brd.list?'<p class="sub">بيحمّل...</p>':''}${brd.err?`<div class="verdict no">${esc(brd.err)}</div>`:''}
+    ${L.length?`<div class="panel">${L.map((e,k)=>`<div class="lrow brow ${e.uid===me?'me':''}"><span class="num">${k<3?['🥇','🥈','🥉'][k]:n(k+1)}</span><span class="av">${esc(e.av||'🧑')}</span><span class="tt">${esc(e.name)}</span><span class="sc">${n(e.pts)} نقطة</span></div>`).join('')}</div>`:(brd.list?'<p class="sub">لسه مفيش نقط الأسبوع ده. ابدأ اتعلم وهتظهر هنا.</p>':'')}
+    <div class="actions"><button class="btn ghost" id="brf" type="button">تحديث</button><button class="btn ghost" id="bleave" type="button">${brd.leave?'متأكد؟ اخرج':'اخرج من المجموعة'}</button></div>`;
+  view.querySelector('#brf').onclick=()=>{ B.publish(); brd.list=null; setTimeout(renderBoard,800); };
+  view.querySelector('#bshare').onclick=()=>{ const t='تعالى نتسابق في تعلم الإنجليزي على تطبيق أتعلم إنجليزي. ادخل مسابقة الأصدقاء واكتب الكود: '+g+'\nhttps://atallam-english.web.app'; if(navigator.share) navigator.share({text:t}).catch(()=>{}); else if(navigator.clipboard) navigator.clipboard.writeText(t).then(()=>toastMsg('الرسالة اتنسخت')); };
+  view.querySelector('#bleave').onclick=()=>{ if(!brd.leave){brd.leave=true;renderBoard();setTimeout(()=>{brd.leave=false;},3000);return;} brd.leave=false; B.leave(); try{localStorage.removeItem(GKEY)}catch(e){} brd.list=null; renderBoard(); };
+}
+
 /* ---------- progress ---------- */
 function renderProgress(){
   const t=today(), H=st.hist||{}, goal=st.goal||PER_DAY, days=Array.from({length:7},(_,k)=>t-6+k), vals=days.map(d=>H[d]||0), mx=Math.max(goal,...vals,1);
@@ -957,7 +1119,7 @@ function renderProgress(){
     <div class="prog7l">${days.map((d,k)=>`<span>${k===6?'النهاردة':DN[new Date(d*86400000).getUTCDay()]}</span>`).join('')}</div>
   </div>
   <div class="tot"><div class="stat"><b>${n(learned)}</b><span>كلمة محفوظة</span></div><div class="stat"><b>${n(master)}</b><span>كلمة متمكن منها</span></div>
-  <div class="stat"><b>${n(les)} من ${n(D.les.length)}</b><span>درس قواعد</span></div><div class="stat"><b>${n(st.last!=null&&st.last>=t-1?st.streak:0)}</b><span>أيام متتالية</span></div></div>
+  <div class="stat"><b>${n(les)} من ${n(D.les.length)}</b><span>درس قواعد</span></div><div class="stat"><b>${n(st.last!=null&&st.last>=t-1?st.streak:0)}</b><span>أيام متتالية</span></div><div class="stat"><b>${n(weekPts())}</b><span>نقطة الأسبوع ده</span></div><div class="stat"><b>${n(Object.keys(st.sto||{}).length)} من ${n(STO.length)}</b><span>قصة</span></div></div>
   <div class="head"><h2>هدفك اليومي</h2><p class="sub">عدد الكلمات الجديدة كل يوم. التغيير بيبدأ من بكرة.</p></div>
   <div class="chips">${[5,10,15,20].map(g=>`<button class="fchip" type="button" data-goal="${g}" aria-pressed="${goal===g}">${n(g)} كلمات</button>`).join('')}</div>`;
   view.querySelectorAll('[data-goal]').forEach(b=>b.onclick=()=>{st.goal=+b.dataset.goal; save(); renderProgress();});
@@ -975,7 +1137,10 @@ const HUBS={
   {k:'gram',t:'دروس القواعد',d:'١٢ درس من فعل يكون لحد أدوات السؤال',f:()=>renderLessons(),meta:()=>{const d=Object.keys(st.les||{}).length;return d?n(d)+' درس خلصته':''}},
   {k:'conv',t:'محادثات',d:'مواقف الشغل والمطعم والدكتور والمطار',f:()=>renderConvos()},
   {k:'phr',t:'جمل يومية',d:'٥٠٠ جملة جاهزة بالنطقين',f:()=>renderPhr()},
-  {k:'rules',t:'قواعد النطق',d:'الحروف المركبة والصامتة وملامح الأمريكي',f:()=>renderRules()}]}
+  {k:'rules',t:'قواعد النطق',d:'الحروف المركبة والصامتة وملامح الأمريكي',f:()=>renderRules()},
+  {k:'sto',t:'قصص قصيرة',d:'١٢ قصة على ٣ مستويات، دوس على أي كلمة تعرف معناها',f:()=>renderStories(),meta:()=>{const d=Object.keys(st.sto||{}).length;return d?n(d)+' قصة خلصتها':''}},
+  {k:'test',t:'اختبار المستوى',d:'اعرف مستواك وابدأ من المكان الصح',f:()=>renderTest(),meta:()=>st.placed?LVNAME[st.placed.lv]:''},
+  {k:'board',t:'مسابقة الأصدقاء',d:'اتسابق مع صحابك وعيلتك كل أسبوع',f:()=>renderBoard(),meta:()=>{const v=weekPts();return v?n(v)+' نقطة الأسبوع ده':''}}]}
 };
 let curTab='today', sub={practice:null,learn:null};
 const subbar=document.getElementById('subbar');
@@ -986,20 +1151,24 @@ function renderHub(name){
   view.innerHTML=`<div class="head"><h2>${h.t}</h2><p class="sub">${h.sub}</p></div><div class="hub">${h.items.map(it=>`<button class="tile" type="button" data-sub="${it.k}">${ICON[it.k]}<b>${it.t}</b><small>${it.d}</small>${it.meta&&it.meta()?`<span class="meta">${it.meta()}</span>`:''}</button>`).join('')}</div>`;
   view.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{sub[name]=b.dataset.sub; renderHub(name); window.scrollTo(0,0);});
 }
-document.getElementById('backb').onclick=()=>{ if(synth) synth.cancel(); playing=-1; sub[curTab]=null; lessonOpen=null; convOpen=null; renderHub(curTab); window.scrollTo(0,0); };
+document.getElementById('backb').onclick=()=>{ if(synth) synth.cancel(); playing=-1; sub[curTab]=null; lessonOpen=null; convOpen=null; stoOpen=null; stoPlay=-1; pt=null; brd.list=null; renderHub(curTab); window.scrollTo(0,0); };
 function openSub(tab,k){ sub[tab]=k; go(tab); }
 
 /* ---------- tabs ---------- */
 const views={today:renderToday,review:renderReview,practice:()=>renderHub('practice'),learn:()=>renderHub('learn'),dict:renderDict};
 function go(t){flip=false; curTab=t; playing=-1; if(synth) synth.cancel(); if(t==='review') rq=null; subbar.hidden=true; document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t)); views[t](); try{sessionStorage.setItem('eng-tab',t)}catch(e){} window.scrollTo(0,0);}
-document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{ if(b.dataset.tab===curTab&&HUBS[curTab]){ sub[curTab]=null; lessonOpen=null; convOpen=null; } go(b.dataset.tab); });
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{ if(b.dataset.tab===curTab&&HUBS[curTab]){ sub[curTab]=null; lessonOpen=null; convOpen=null; stoOpen=null; stoPlay=-1; pt=null; brd.list=null; } go(b.dataset.tab); });
 backFn=()=>{
+  const wp=document.getElementById('wpop'); if(wp) return ()=>wp.remove();
+  if(curTab==='learn'&&sub.learn==='sto'&&stoOpen!=null) return ()=>{stoOpen=null;stoPlay=-1;if(synth)synth.cancel();renderStories();window.scrollTo(0,0);};
+  if(curTab==='learn'&&sub.learn==='test'&&pt&&pt.k<pt.qs.length) return ()=>{pt=null;renderTest();};
   if(curTab==='learn'&&sub.learn==='gram'&&lessonOpen!=null) return ()=>{lessonOpen=null;renderLessons();window.scrollTo(0,0);};
   if(curTab==='learn'&&sub.learn==='conv'&&convOpen!=null) return ()=>{convOpen=null;playing=-1;if(synth)synth.cancel();renderConvos();window.scrollTo(0,0);};
   if(HUBS[curTab]&&sub[curTab]) return ()=>document.getElementById('backb').click();
   if(curTab!=='today') return ()=>go('today');
   return null;
 };
+window.__onAuth=()=>{ if(curTab==='learn'&&sub.learn==='board'){ brd.list=null; renderBoard(); } };
 const avb=document.getElementById('avb'); avb.textContent=ME.av; avb.title=ME.name; avb.onclick=openPicker;
 window.__app={get:()=>st,set:r=>{st=Object.assign(st,r); try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){} paintSpeed(); stats(); go(curTab);}};
 stats();

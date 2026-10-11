@@ -12,3 +12,6 @@
 - قسم الأطفال في src/parts/family.js وتنسيقه في src/parts/family.css، ومحتواه في src/content/kids.py. بعد تعديل المحتوى شغّل python3 src/tools/add_kids.py وبعدها python3 src/build.py.
 - ملحوظة: الأجزاء دي اتدمجت جوه src/template.html، فأي تعديل يتعمل في القالب نفسه.
 - غيّر رقم الكاش في public/sw.js مع كل تحديث كبير عشان الأجهزة تاخد النسخة الجديدة.
+- القصص في src/content/stories.py، وبعد تعديلها شغّل python3 src/tools/add_stories.py وبعدها build.py.
+- الدفعة التانية: قصص، اختبار مستوى، نقط أسبوعية في st.pts و ks.pts، ومسابقة أصدقاء في مجموعة board بفايربيز، والمزامنة في users/uid بكل حسابات العيلة. كود المجموعة في المفتاح eng-group.
+- قواعد فايربيز في firestore.rules لازم تتحط يدوي من اللوحة أو بأمر النشر من جهاز المستخدم.
