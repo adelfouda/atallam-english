@@ -806,6 +806,7 @@ const ICON={
  gram:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h7a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H4zM20 5h-7a2 2 0 0 0-2 2"/><path d="M20 5v13h-7"/></svg>',
  conv:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h11v8H8l-4 3z"/><path d="M15 9h5v8l-3-2h-6v-2"/></svg>',
  phr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v10H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>',
+ admin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>',
  mine:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12v18l-6-4-6 4z"/></svg>',
  prog:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
  sto:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h10l3 3v15H6z"/><path d="M9 8h6M9 12h7M9 16h4"/><path d="M3 6v15h3"/></svg>',
@@ -1149,6 +1150,42 @@ function renderMine(){
   const m=view.querySelector('#mwmore'); if(m) m.onclick=()=>{const y=window.scrollY; mwN+=100; renderMine(); window.scrollTo(0,y);};
 }
 
+/* ---------- admin ---------- */
+let adm={rows:null,err:null,busy:false,open:null};
+const ago=ts=>{ if(!ts) return '—'; const m=Math.floor((Date.now()-ts)/60000); if(m<2) return 'دلوقتي'; if(m<60) return 'من '+n(m)+' دقيقة'; const h=Math.floor(m/60); if(h<24) return 'من '+n(h)+' ساعة'; const d=Math.floor(h/24); return d===1?'امبارح':'من '+n(d)+' يوم'; };
+function profSum(p,raw){
+  let o={}; try{o=JSON.parse(raw||'{}')||{};}catch(e){}
+  const w=Math.floor((today()-3)/7), pts=o.pts&&o.pts.wk===w?o.pts.v:0;
+  if(p.type==='adult'){ const P=o.p||{}; const learned=Object.values(P).filter(v=>v[0]>0).length, master=Object.values(P).filter(v=>v[0]>=4).length;
+    return {kid:false,learned,master,started:Object.keys(P).length,streak:o.last!=null&&o.last>=today()-1?o.streak||0:0,les:Object.keys(o.les||{}).length,sto:Object.keys(o.sto||{}).length,lv:o.placed?LVNAME[o.placed.lv]:null,pts,ts:o.ts||0}; }
+  return {kid:true,stars:o.stars||0,badges:Object.keys(o.badges||{}).length,seen:Object.values(o.seen||{}).reduce((a,x)=>a+x.length,0),pts,ts:o.ts||0};
+}
+function renderAdmin(){
+  const A=window.__admin;
+  if(!A){ view.innerHTML='<div class="empty"><h2>الصفحة دي للأدمن بس</h2></div>'; return; }
+  if(adm.rows==null&&!adm.busy){ adm.busy=true; A.list().then(r=>{adm.rows=r;adm.err=null;}).catch(e=>{adm.rows=[];adm.err='مقدرناش نجيب البيانات: '+(e&&e.code||'');}).finally(()=>{adm.busy=false; if(curTab==='learn'&&sub.learn==='admin') renderAdmin();}); }
+  const rows=(adm.rows||[]).map(u=>{ const data={}; (u.data||[]).forEach(x=>data[x.k]=x.v); const ps=(u.profiles||[]).map(p=>Object.assign({p},profSum(p,data[profKey(p)])));
+    return Object.assign({},u,{ps,last:u.lastSeen||u.ts||0}); }).sort((a,b)=>b.last-a.last);
+  if(adm.open!=null){ const u=rows.find(r=>r.id===adm.open); if(u){
+    view.innerHTML=`<div class="head"><h2>${esc(u.name||'بدون اسم')}</h2><p class="sub en" style="direction:ltr;text-align:right">${esc(u.email||'')}</p></div>
+    <div class="tot"><div class="stat"><b>${ago(u.last)}</b><span>آخر دخول</span></div><div class="stat"><b>${u.created?new Date(u.created).toLocaleDateString('ar-EG'):'—'}</b><span>أول دخول</span></div></div>
+    <h3 class="lvh">الحسابات اللي جواه</h3>
+    ${u.ps.map(x=>`<div class="panel" style="padding:12px 14px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:1.6rem">${esc(x.p.av)}</span><b style="flex:1">${esc(x.p.name)}</b><small class="sub">${TYPES[x.p.type]?TYPES[x.p.type].t:''} · ${ago(x.ts)}</small></div>
+      <div class="tot">${x.kid?`<div class="stat"><b>${n(x.stars)}</b><span>نجمة</span></div><div class="stat"><b>${n(x.badges)}</b><span>شارة</span></div><div class="stat"><b>${n(x.seen)}</b><span>كلمة شافها</span></div><div class="stat"><b>${n(x.pts)}</b><span>نقطة الأسبوع</span></div>`
+      :`<div class="stat"><b>${n(x.learned)}</b><span>كلمة محفوظة</span></div><div class="stat"><b>${n(x.master)}</b><span>متمكن منها</span></div><div class="stat"><b>${n(x.streak)}</b><span>أيام متتالية</span></div><div class="stat"><b>${n(x.pts)}</b><span>نقطة الأسبوع</span></div><div class="stat"><b>${n(x.les)} من ${n(D.les.length)}</b><span>درس قواعد</span></div><div class="stat"><b>${n(x.sto)} من ${n(STO.length)}</b><span>قصة</span></div>${x.lv?`<div class="stat"><b>${x.lv}</b><span>المستوى</span></div>`:''}`}</div></div>`).join('')}
+    <button class="btn ghost" id="aback" type="button">كل المستخدمين</button>`;
+    view.querySelector('#aback').onclick=()=>{adm.open=null;renderAdmin();window.scrollTo(0,0);}; return; } adm.open=null; }
+  const day=86400000, now=Date.now();
+  const actD=rows.filter(r=>now-r.last<day).length, actW=rows.filter(r=>now-r.last<7*day).length, profs=rows.reduce((a,r)=>a+r.ps.length,0);
+  view.innerHTML=`<div class="head"><h2>لوحة الأدمن</h2><p class="sub">كل اللي سجلوا دخول بجوجل في التطبيق. اللي بيستخدم التطبيق من غير تسجيل دخول مش بيظهر هنا.</p></div>
+  <div class="tot"><div class="stat"><b>${n(rows.length)}</b><span>مستخدم مسجل</span></div><div class="stat"><b>${n(profs)}</b><span>حساب جوه العيلات</span></div><div class="stat"><b>${n(actD)}</b><span>دخلوا النهاردة</span></div><div class="stat"><b>${n(actW)}</b><span>دخلوا الأسبوع ده</span></div></div>
+  ${adm.busy&&!adm.rows?'<p class="sub">بيحمّل...</p>':''}${adm.err?`<div class="verdict no">${esc(adm.err)}</div>`:''}
+  ${rows.length?`<div class="panel">${rows.map(r=>{const top=r.ps.find(x=>!x.kid); return `<button class="lrow" type="button" data-u="${esc(r.id)}">${r.photo?`<img src="${esc(r.photo)}" alt="" width="34" height="34" style="border-radius:50%;flex:none" referrerpolicy="no-referrer">`:'<span class="num">👤</span>'}<span class="tt" style="display:flex;flex-direction:column;gap:2px"><b>${esc(r.name||'بدون اسم')}</b><small class="sub">${r.ps.map(x=>esc(x.p.av)).join(' ')} · ${top?n(top.learned)+' كلمة':''}</small></span><span class="sc">${ago(r.last)}</span></button>`}).join('')}</div>`:''}
+  <button class="btn ghost" id="arf" type="button">تحديث</button>`;
+  view.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>{adm.open=b.dataset.u;renderAdmin();window.scrollTo(0,0);});
+  view.querySelector('#arf').onclick=()=>{adm.rows=null;renderAdmin();};
+}
+
 /* ---------- progress ---------- */
 function renderProgress(){
   const t=today(), H=st.hist||{}, goal=st.goal||PER_DAY, days=Array.from({length:7},(_,k)=>t-6+k), vals=days.map(d=>H[d]||0), mx=Math.max(goal,...vals,1);
@@ -1176,6 +1213,7 @@ const HUBS={
   {k:'order',t:'رتب الجملة',d:'تكوّن الجملة من كلمات متلخبطة',f:()=>renderOrder()},
   {k:'speak',t:'انطق',d:'تقول الكلمة في المايك ويقولك نطقك صح ولا لأ',f:()=>renderSpeak()}]},
  learn:{t:'دروس',sub:'القواعد والمحادثات والجمل الجاهزة.',items:[
+  {k:'admin',t:'لوحة الأدمن',d:'مين سجل دخول وكل واحد وصل لفين',f:()=>renderAdmin(),show:()=>!!window.__admin},
   {k:'mine',t:'كلماتي',d:'كل كلماتك ومستوى حفظ كل واحدة',f:()=>renderMine(),meta:()=>{const c=Object.keys(st.p).length;return c?n(c)+' كلمة':''}},
   {k:'prog',t:'تقدمي',d:'آخر ٧ أيام وهدفك اليومي',f:()=>renderProgress(),meta:()=>{const t=(st.hist||{})[today()]||0;return t?n(t)+' كلمة النهاردة':''}},
   {k:'gram',t:'دروس القواعد',d:'١٢ درس من فعل يكون لحد أدوات السؤال',f:()=>renderLessons(),meta:()=>{const d=Object.keys(st.les||{}).length;return d?n(d)+' درس خلصته':''}},
@@ -1192,7 +1230,7 @@ function renderHub(name){
   const h=HUBS[name]; const s=sub[name];
   if(s){ const it=h.items.find(x=>x.k===s); subbar.hidden=false; document.getElementById('subt').textContent=it.t; it.f(); return; }
   subbar.hidden=true;
-  view.innerHTML=`<div class="head"><h2>${h.t}</h2><p class="sub">${h.sub}</p></div><div class="hub">${h.items.map(it=>`<button class="tile" type="button" data-sub="${it.k}">${ICON[it.k]}<b>${it.t}</b><small>${it.d}</small>${it.meta&&it.meta()?`<span class="meta">${it.meta()}</span>`:''}</button>`).join('')}</div>`;
+  view.innerHTML=`<div class="head"><h2>${h.t}</h2><p class="sub">${h.sub}</p></div><div class="hub">${h.items.filter(it=>!it.show||it.show()).map(it=>`<button class="tile" type="button" data-sub="${it.k}">${ICON[it.k]}<b>${it.t}</b><small>${it.d}</small>${it.meta&&it.meta()?`<span class="meta">${it.meta()}</span>`:''}</button>`).join('')}</div>`;
   view.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{sub[name]=b.dataset.sub; renderHub(name); window.scrollTo(0,0);});
 }
 document.getElementById('backb').onclick=()=>{ if(synth) synth.cancel(); playing=-1; sub[curTab]=null; lessonOpen=null; convOpen=null; stoOpen=null; stoPlay=-1; pt=null; brd.list=null; renderHub(curTab); window.scrollTo(0,0); };
@@ -1205,6 +1243,7 @@ document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{ if(b.dataset.tab===
 backFn=()=>{
   const wp=document.getElementById('wpop'); if(wp) return ()=>wp.remove();
   if(curTab==='learn'&&sub.learn==='sto'&&stoOpen!=null) return ()=>{stoOpen=null;stoPlay=-1;if(synth)synth.cancel();renderStories();window.scrollTo(0,0);};
+  if(curTab==='learn'&&sub.learn==='admin'&&adm.open!=null) return ()=>{adm.open=null;renderAdmin();window.scrollTo(0,0);};
   if(curTab==='learn'&&sub.learn==='test'&&pt&&pt.k<pt.qs.length) return ()=>{pt=null;renderTest();};
   if(curTab==='learn'&&sub.learn==='gram'&&lessonOpen!=null) return ()=>{lessonOpen=null;renderLessons();window.scrollTo(0,0);};
   if(curTab==='learn'&&sub.learn==='conv'&&convOpen!=null) return ()=>{convOpen=null;playing=-1;if(synth)synth.cancel();renderConvos();window.scrollTo(0,0);};
@@ -1212,7 +1251,7 @@ backFn=()=>{
   if(curTab!=='today') return ()=>go('today');
   return null;
 };
-window.__onAuth=()=>{ if(curTab==='learn'&&sub.learn==='board'){ brd.list=null; renderBoard(); } };
+window.__onAuth=()=>{ if(curTab==='learn'&&sub.learn==='board'){ brd.list=null; renderBoard(); } else if(curTab==='learn'&&!sub.learn) renderHub('learn'); };
 document.getElementById('stL').onclick=()=>{mwF='all';openSub('learn','mine');};
 document.getElementById('stD').onclick=()=>go('review');
 document.getElementById('stS').onclick=()=>openSub('learn','prog');
@@ -1248,7 +1287,7 @@ const FIREBASE_CONFIG = {"apiKey":"AIzaSyCc0HzPPYbm_lB34t8p8ULplceoQbHaHe8","aut
   const V='10.12.2', base='https://www.gstatic.com/firebasejs/'+V+'/';
   const load=src=>new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=no;document.head.appendChild(s);});
   const acct=document.getElementById('acct'); if(acct){acct.hidden=false; acct.textContent='سجّل دخول';}
-  const PK='eng-profiles', GK='eng-group';
+  const PK='eng-profiles', GK='eng-group', ADMINS=['YSoiPXN88RgJC08qFoeiCgFwsJz2'];
   const lsGet=k=>{try{return localStorage.getItem(k);}catch(e){return null;}};
   const lsSetRaw=(k,v)=>{try{localStorage.setItem(k,v);}catch(e){}};
   const profiles=()=>{try{const p=JSON.parse(lsGet(PK)||'null'); return Array.isArray(p)&&p.length?p:[{id:'me',name:'أنا',type:'adult',av:'🧑'}];}catch(e){return [{id:'me',name:'أنا',type:'adult',av:'🧑'}];}};
@@ -1264,7 +1303,7 @@ const FIREBASE_CONFIG = {"apiKey":"AIzaSyCc0HzPPYbm_lB34t8p8ULplceoQbHaHe8","aut
       const w=wk(); return Promise.all(profiles().map(p=>{ let pts=0; try{const o=JSON.parse(lsGet(keyOf(p))||'{}'); if(o.pts&&o.pts.wk===w) pts=o.pts.v;}catch(e){}
         return db.collection('board').doc(u.uid+'_'+p.id).set({uid:u.uid,name:(p.id==='me'&&p.name==='أنا'&&u.displayName)?u.displayName:p.name,av:p.av,group:g,wk:w,pts,ts:Date.now()}); })).catch(()=>{}); };
     const push=()=>{ const u=auth.currentUser; if(!u||!ready) return; clearTimeout(timer); timer=setTimeout(()=>{
-      db.collection('users').doc(u.uid).set(Object.assign(snapshot(),{name:u.displayName||''})).catch(()=>{}); publish(); },1500); };
+      db.collection('users').doc(u.uid).set(Object.assign(snapshot(),{name:u.displayName||'',email:u.email||'',photo:u.photoURL||'',lastSeen:Date.now()}),{merge:true}).catch(()=>{}); publish(); },1500); };
     window.__onSave=push; window.__onKidSave=push; window.__onProfiles=push;
     const signIn=()=>{ const p=new firebase.auth.GoogleAuthProvider(); auth.signInWithPopup(p).catch(e=>{ if(e&&e.code!=='auth/popup-closed-by-user'&&e.code!=='auth/cancelled-popup-request') auth.signInWithRedirect(p); }); };
     window.__board={ user:()=>auth.currentUser, signIn, publish,
@@ -1274,9 +1313,11 @@ const FIREBASE_CONFIG = {"apiKey":"AIzaSyCc0HzPPYbm_lB34t8p8ULplceoQbHaHe8","aut
     auth.onAuthStateChanged(async u=>{
       if(acct) acct.textContent=u?'متزامن ✓':'سجّل دخول';
       if(window.__onAuth) setTimeout(()=>window.__onAuth(u),0);
-      ready=false; if(!u) return;
+      ready=false; window.__admin=u&&ADMINS.includes(u.uid)?{list:()=>db.collection('users').get().then(q=>q.docs.map(d=>Object.assign({id:d.id},d.data())))}:null;
+      if(!u) return;
       try{
         const d=await db.collection('users').doc(u.uid).get(); let changed=false;
+        if(!d.exists||!d.data().created) db.collection('users').doc(u.uid).set({created:Date.now()},{merge:true}).catch(()=>{});
         if(d.exists){ const r=d.data();
           let data=r.data||[]; if(!r.data&&r.st) data=[{k:'eng-cards-v1',v:JSON.stringify(r.st)}];
           if(Array.isArray(r.profiles)){ const loc=profiles(); const ids=new Set(loc.map(p=>p.id)); const add=r.profiles.filter(p=>!ids.has(p.id));

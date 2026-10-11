@@ -23,7 +23,7 @@ const FIREBASE_CONFIG = __FIREBASE_CONFIG__;
   const V='10.12.2', base='https://www.gstatic.com/firebasejs/'+V+'/';
   const load=src=>new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=no;document.head.appendChild(s);});
   const acct=document.getElementById('acct'); if(acct){acct.hidden=false; acct.textContent='سجّل دخول';}
-  const PK='eng-profiles', GK='eng-group';
+  const PK='eng-profiles', GK='eng-group', ADMINS=['YSoiPXN88RgJC08qFoeiCgFwsJz2'];
   const lsGet=k=>{try{return localStorage.getItem(k);}catch(e){return null;}};
   const lsSetRaw=(k,v)=>{try{localStorage.setItem(k,v);}catch(e){}};
   const profiles=()=>{try{const p=JSON.parse(lsGet(PK)||'null'); return Array.isArray(p)&&p.length?p:[{id:'me',name:'أنا',type:'adult',av:'🧑'}];}catch(e){return [{id:'me',name:'أنا',type:'adult',av:'🧑'}];}};
@@ -39,7 +39,7 @@ const FIREBASE_CONFIG = __FIREBASE_CONFIG__;
       const w=wk(); return Promise.all(profiles().map(p=>{ let pts=0; try{const o=JSON.parse(lsGet(keyOf(p))||'{}'); if(o.pts&&o.pts.wk===w) pts=o.pts.v;}catch(e){}
         return db.collection('board').doc(u.uid+'_'+p.id).set({uid:u.uid,name:(p.id==='me'&&p.name==='أنا'&&u.displayName)?u.displayName:p.name,av:p.av,group:g,wk:w,pts,ts:Date.now()}); })).catch(()=>{}); };
     const push=()=>{ const u=auth.currentUser; if(!u||!ready) return; clearTimeout(timer); timer=setTimeout(()=>{
-      db.collection('users').doc(u.uid).set(Object.assign(snapshot(),{name:u.displayName||''})).catch(()=>{}); publish(); },1500); };
+      db.collection('users').doc(u.uid).set(Object.assign(snapshot(),{name:u.displayName||'',email:u.email||'',photo:u.photoURL||'',lastSeen:Date.now()}),{merge:true}).catch(()=>{}); publish(); },1500); };
     window.__onSave=push; window.__onKidSave=push; window.__onProfiles=push;
     const signIn=()=>{ const p=new firebase.auth.GoogleAuthProvider(); auth.signInWithPopup(p).catch(e=>{ if(e&&e.code!=='auth/popup-closed-by-user'&&e.code!=='auth/cancelled-popup-request') auth.signInWithRedirect(p); }); };
     window.__board={ user:()=>auth.currentUser, signIn, publish,
@@ -49,9 +49,11 @@ const FIREBASE_CONFIG = __FIREBASE_CONFIG__;
     auth.onAuthStateChanged(async u=>{
       if(acct) acct.textContent=u?'متزامن ✓':'سجّل دخول';
       if(window.__onAuth) setTimeout(()=>window.__onAuth(u),0);
-      ready=false; if(!u) return;
+      ready=false; window.__admin=u&&ADMINS.includes(u.uid)?{list:()=>db.collection('users').get().then(q=>q.docs.map(d=>Object.assign({id:d.id},d.data())))}:null;
+      if(!u) return;
       try{
         const d=await db.collection('users').doc(u.uid).get(); let changed=false;
+        if(!d.exists||!d.data().created) db.collection('users').doc(u.uid).set({created:Date.now()},{merge:true}).catch(()=>{});
         if(d.exists){ const r=d.data();
           let data=r.data||[]; if(!r.data&&r.st) data=[{k:'eng-cards-v1',v:JSON.stringify(r.st)}];
           if(Array.isArray(r.profiles)){ const loc=profiles(); const ids=new Set(loc.map(p=>p.id)); const add=r.profiles.filter(p=>!ids.has(p.id));
