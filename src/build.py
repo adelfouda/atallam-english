@@ -2,7 +2,8 @@
 التشغيل من جذر المستودع:  python3 src/build.py  أو  python3 src/build.py '{...firebase config...}'"""
 import sys, os
 root=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-cfg=sys.argv[1] if len(sys.argv)>1 else 'null'
+cfgf=os.path.join(root,'src/firebase-config.json')
+cfg=sys.argv[1] if len(sys.argv)>1 else (open(cfgf,encoding='utf-8').read().strip() if os.path.exists(cfgf) else 'null')
 tpl=open(os.path.join(root,'src/template.html'),encoding='utf-8').read()
 data=open(os.path.join(root,'src/data3.json'),encoding='utf-8').read().replace('</','<\\/')
 head='''<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">

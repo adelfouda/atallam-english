@@ -1207,7 +1207,7 @@ if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.s
 })();
 
 /* Account sync + friends board with Firebase */
-const FIREBASE_CONFIG = null;
+const FIREBASE_CONFIG = {"apiKey":"AIzaSyCc0HzPPYbm_lB34t8p8ULplceoQbHaHe8","authDomain":"atallam-english.firebaseapp.com","projectId":"atallam-english","storageBucket":"atallam-english.firebasestorage.app","messagingSenderId":"502534938209","appId":"1:502534938209:web:ad654f0121de9d510f5420"};
 (function(){
   if(!FIREBASE_CONFIG) return;
   const V='10.12.2', base='https://www.gstatic.com/firebasejs/'+V+'/';
@@ -1227,7 +1227,7 @@ const FIREBASE_CONFIG = null;
     const snapshot=()=>{ const ps=profiles(); return {profiles:ps, data:ps.map(p=>({k:keyOf(p),v:lsGet(keyOf(p))||''})).filter(x=>x.v), ts:Date.now()}; };
     const publish=()=>{ const u=auth.currentUser, g=JSON.parse(lsGet(GK)||'null'); if(!u||!g) return Promise.resolve();
       const w=wk(); return Promise.all(profiles().map(p=>{ let pts=0; try{const o=JSON.parse(lsGet(keyOf(p))||'{}'); if(o.pts&&o.pts.wk===w) pts=o.pts.v;}catch(e){}
-        return db.collection('board').doc(u.uid+'_'+p.id).set({uid:u.uid,name:p.name,av:p.av,group:g,wk:w,pts,ts:Date.now()}); })).catch(()=>{}); };
+        return db.collection('board').doc(u.uid+'_'+p.id).set({uid:u.uid,name:(p.id==='me'&&p.name==='أنا'&&u.displayName)?u.displayName:p.name,av:p.av,group:g,wk:w,pts,ts:Date.now()}); })).catch(()=>{}); };
     const push=()=>{ const u=auth.currentUser; if(!u||!ready) return; clearTimeout(timer); timer=setTimeout(()=>{
       db.collection('users').doc(u.uid).set(Object.assign(snapshot(),{name:u.displayName||''})).catch(()=>{}); publish(); },1500); };
     window.__onSave=push; window.__onKidSave=push; window.__onProfiles=push;
