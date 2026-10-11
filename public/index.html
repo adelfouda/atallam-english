@@ -47,6 +47,18 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 8px;text-align:center}
 .stat b{display:block;font-size:1.3rem;font-weight:600;font-variant-numeric:tabular-nums}
 .stat span{color:var(--muted);font-size:.78rem}
+button.stat{font:inherit;color:inherit;cursor:pointer}
+button.stat:active{background:var(--soft)}
+.mw{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid var(--line)}
+.mw:first-child{border-top:0}
+.mw .t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.mw .t .en{font-family:var(--f-en);direction:ltr;text-align:left;font-weight:650;font-size:1.05rem}
+.mw .t .pp{color:var(--margin);font-size:.85rem}
+.mw .t small{color:var(--muted)}
+.mw .lv{align-self:flex-start;font-size:.72rem;border-radius:999px;padding:1px 8px;white-space:nowrap;background:var(--soft);color:var(--accent)}
+.mw .lv.m{background:var(--good-bg);color:var(--good)} .mw .lv.w{background:var(--bad-bg);color:var(--bad)}
+.mw .sp{border:1px solid var(--line);background:var(--card);border-radius:50%;width:36px;height:36px;display:grid;place-items:center;flex:none}
+.mw .sp svg{width:18px;height:18px}
 
 h2{font-size:1.1rem;font-weight:600;margin:0;text-wrap:balance}
 .sub{color:var(--muted);font-size:.88rem;margin:0}
@@ -352,9 +364,9 @@ h2{font-size:1.1rem;font-weight:600;margin:0;text-wrap:balance}
     <div class="row2"><button class="avbtn" id="avb" type="button" aria-label="تغيير المستخدم"></button><button class="speed" id="acct" type="button" hidden>حسابي</button><button class="speed" id="speed" type="button">سرعة الصوت: عادي</button></div>
   </header>
   <section class="stats" aria-label="تقدمك">
-    <div class="stat"><b id="sLearned">٠</b><span>كلمة محفوظة</span></div>
-    <div class="stat"><b id="sDue">٠</b><span>للمراجعة النهاردة</span></div>
-    <div class="stat"><b id="sStreak">٠</b><span>أيام متتالية</span></div>
+    <button class="stat" type="button" id="stL"><b id="sLearned">٠</b><span>كلمة محفوظة</span></button>
+    <button class="stat" type="button" id="stD"><b id="sDue">٠</b><span>للمراجعة النهاردة</span></button>
+    <button class="stat" type="button" id="stS"><b id="sStreak">٠</b><span>أيام متتالية</span></button>
   </section>
   <div class="subbar" id="subbar" hidden><button id="backb" type="button"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>رجوع</button><span id="subt"></span></div>
   <main id="view"></main>
@@ -794,6 +806,7 @@ const ICON={
  gram:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h7a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H4zM20 5h-7a2 2 0 0 0-2 2"/><path d="M20 5v13h-7"/></svg>',
  conv:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h11v8H8l-4 3z"/><path d="M15 9h5v8l-3-2h-6v-2"/></svg>',
  phr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v10H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>',
+ mine:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12v18l-6-4-6 4z"/></svg>',
  prog:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
  sto:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h10l3 3v15H6z"/><path d="M9 8h6M9 12h7M9 16h4"/><path d="M3 6v15h3"/></svg>',
  test:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg>',
@@ -1118,6 +1131,24 @@ function renderBoard(){
   view.querySelector('#bleave').onclick=()=>{ if(!brd.leave){brd.leave=true;renderBoard();setTimeout(()=>{brd.leave=false;},3000);return;} brd.leave=false; B.leave(); try{localStorage.removeItem(GKEY)}catch(e){} brd.list=null; renderBoard(); };
 }
 
+/* ---------- my words ---------- */
+let mwF='all', mwN=60;
+function renderMine(){
+  const t=today(); const all=Object.keys(st.p).map(Number);
+  const cat=i=>{const b=st.p[i][0]; return b>=4?'m':b>=1?'l':'w';};
+  const cnt={all:all.length,m:all.filter(i=>cat(i)==='m').length,l:all.filter(i=>cat(i)==='l').length,w:all.filter(i=>cat(i)==='w').length};
+  const list=all.filter(i=>mwF==='all'||cat(i)===mwF).sort((a,b)=>st.p[a][1]-st.p[b][1]||a-b);
+  const LBL={m:'متمكن منها',l:'بتحفظها',w:'لسه محتاجة شغل'};
+  const lvTxt=i=>{const c=cat(i), d=st.p[i][1]-t; return LBL[c]+' · '+(d<=0?'مراجعتها النهاردة':d===1?'مراجعتها بكرة':'مراجعتها بعد '+n(d)+' أيام');};
+  view.innerHTML=`<div class="head"><h2>كلماتي</h2><p class="sub">كل الكلمات اللي بدأت تحفظها. كل ما تراجع الكلمة صح، ميعاد مراجعتها الجاية بيبعد.</p></div>
+  <div class="chips">${[['all','الكل'],['m','متمكن منها'],['l','بتحفظها'],['w','محتاجة شغل']].map(([k,l])=>`<button class="fchip" type="button" data-f="${k}" aria-pressed="${mwF===k}">${l} ${n(cnt[k])}</button>`).join('')}</div>
+  ${list.length?`<div class="panel">${list.slice(0,mwN).map(i=>{const w=W[i],c=cat(i);return `<div class="mw"><button class="sp" type="button" data-say="${esc(w.w)}" aria-label="اسمع">${SPK}</button><div class="t"><span class="en" lang="en">${esc(w.w)}</span><span class="pp">${esc(w.p)}</span><span>${esc(w.m)}</span><span class="lv ${c}">${lvTxt(i)}</span></div></div>`}).join('')}</div>
+  ${list.length>mwN?`<button class="btn ghost wide" id="mwmore" type="button">اعرض كمان (${n(list.length-mwN)} كلمة)</button>`:''}`
+  :`<div class="empty"><h2>لسه مفيش كلمات هنا</h2><p class="sub">ابدأ من تبويب «اليوم» واحفظ كلماتك الأولى.</p></div>`}`;
+  view.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{mwF=b.dataset.f;mwN=60;renderMine();});
+  const m=view.querySelector('#mwmore'); if(m) m.onclick=()=>{const y=window.scrollY; mwN+=100; renderMine(); window.scrollTo(0,y);};
+}
+
 /* ---------- progress ---------- */
 function renderProgress(){
   const t=today(), H=st.hist||{}, goal=st.goal||PER_DAY, days=Array.from({length:7},(_,k)=>t-6+k), vals=days.map(d=>H[d]||0), mx=Math.max(goal,...vals,1);
@@ -1145,6 +1176,7 @@ const HUBS={
   {k:'order',t:'رتب الجملة',d:'تكوّن الجملة من كلمات متلخبطة',f:()=>renderOrder()},
   {k:'speak',t:'انطق',d:'تقول الكلمة في المايك ويقولك نطقك صح ولا لأ',f:()=>renderSpeak()}]},
  learn:{t:'دروس',sub:'القواعد والمحادثات والجمل الجاهزة.',items:[
+  {k:'mine',t:'كلماتي',d:'كل كلماتك ومستوى حفظ كل واحدة',f:()=>renderMine(),meta:()=>{const c=Object.keys(st.p).length;return c?n(c)+' كلمة':''}},
   {k:'prog',t:'تقدمي',d:'آخر ٧ أيام وهدفك اليومي',f:()=>renderProgress(),meta:()=>{const t=(st.hist||{})[today()]||0;return t?n(t)+' كلمة النهاردة':''}},
   {k:'gram',t:'دروس القواعد',d:'١٢ درس من فعل يكون لحد أدوات السؤال',f:()=>renderLessons(),meta:()=>{const d=Object.keys(st.les||{}).length;return d?n(d)+' درس خلصته':''}},
   {k:'conv',t:'محادثات',d:'مواقف الشغل والمطعم والدكتور والمطار',f:()=>renderConvos()},
@@ -1181,6 +1213,9 @@ backFn=()=>{
   return null;
 };
 window.__onAuth=()=>{ if(curTab==='learn'&&sub.learn==='board'){ brd.list=null; renderBoard(); } };
+document.getElementById('stL').onclick=()=>{mwF='all';openSub('learn','mine');};
+document.getElementById('stD').onclick=()=>go('review');
+document.getElementById('stS').onclick=()=>openSub('learn','prog');
 const avb=document.getElementById('avb'); avb.textContent=ME.av; avb.title=ME.name; avb.onclick=openPicker;
 window.__app={get:()=>st,set:r=>{st=Object.assign(st,r); try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){} paintSpeed(); stats(); go(curTab);}};
 stats();
