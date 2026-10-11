@@ -29,6 +29,24 @@ const FIREBASE_CONFIG = __FIREBASE_CONFIG__;
   const profiles=()=>{try{const p=JSON.parse(lsGet(PK)||'null'); return Array.isArray(p)&&p.length?p:[{id:'me',name:'أنا',type:'adult',av:'🧑'}];}catch(e){return [{id:'me',name:'أنا',type:'adult',av:'🧑'}];}};
   const keyOf=p=>p.type==='adult'?(p.id==='me'?'eng-cards-v1':'eng-cards-v1:'+p.id):'eng-kid:'+p.id;
   const tsOf=v=>{try{return (JSON.parse(v)||{}).ts||0;}catch(e){return 0;}};
+  const mx=(a,b)=>Math.max(a||0,b||0);
+  const mergeObj=(a,b,f)=>{const o=Object.assign({},a||{}); Object.entries(b||{}).forEach(([k,v])=>{o[k]=k in o?f(o[k],v):v;}); return o;};
+  function mergeState(key,A,B){
+    if(!A) return B; if(!B) return A;
+    const newer=(B.ts||0)>(A.ts||0)?B:A, older=newer===A?B:A, o=Object.assign({},older,newer);
+    const pts=A.pts&&B.pts&&A.pts.wk===B.pts.wk?{wk:A.pts.wk,v:mx(A.pts.v,B.pts.v)}:((A.pts&&B.pts)?(A.pts.wk>B.pts.wk?A.pts:B.pts):(A.pts||B.pts));
+    if(pts) o.pts=pts;
+    if(key.startsWith('eng-kid:')){
+      o.stars=mx(A.stars,B.stars); o.best=mergeObj(A.best,B.best,mx); o.badges=mergeObj(A.badges,B.badges,(x,y)=>x||y);
+      o.seen=mergeObj(A.seen,B.seen,(x,y)=>Array.from(new Set([...(x||[]),...(y||[])])));
+    } else {
+      o.p=mergeObj(A.p,B.p,(x,y)=>x[0]!==y[0]?(x[0]>y[0]?x:y):(x[1]>=y[1]?x:y));
+      o.next=mx(A.next,B.next); o.hist=mergeObj(A.hist,B.hist,mx); o.les=mergeObj(A.les,B.les,mx); o.sto=mergeObj(A.sto,B.sto,mx);
+      o.streak=mx(A.streak,B.streak); o.last=mx(A.last,B.last); o.placed=newer.placed||older.placed;
+      if(o.plan&&o.plan.queue) o.plan=Object.assign({},o.plan,{queue:o.plan.queue.filter(i=>!(o.p[i]&&o.p[i][0]>0)||(o.plan.done||[]).includes(i))});
+    }
+    o.ts=Math.max(A.ts||0,B.ts||0)+1; return o;
+  }
   const wk=()=>{const d=new Date();return Math.floor((Math.floor((d.getTime()-d.getTimezoneOffset()*60000)/86400000)-3)/7);};
   load(base+'firebase-app-compat.js').then(()=>Promise.all([load(base+'firebase-auth-compat.js'),load(base+'firebase-firestore-compat.js')])).then(()=>{
     firebase.initializeApp(FIREBASE_CONFIG);
@@ -58,13 +76,17 @@ const FIREBASE_CONFIG = __FIREBASE_CONFIG__;
           let data=r.data||[]; if(!r.data&&r.st) data=[{k:'eng-cards-v1',v:JSON.stringify(r.st)}];
           if(Array.isArray(r.profiles)){ const loc=profiles(); const ids=new Set(loc.map(p=>p.id)); const add=r.profiles.filter(p=>!ids.has(p.id));
             if(add.length||!lsGet(PK)){ lsSetRaw(PK,JSON.stringify(loc.concat(add))); changed=changed||add.length>0; } }
-          data.forEach(x=>{ const loc=lsGet(x.k); if(x.v&&tsOf(x.v)>tsOf(loc)){ lsSetRaw(x.k,x.v); changed=true; } });
+          data.forEach(x=>{ if(!x.v) return; const loc=lsGet(x.k); if(loc===x.v) return;
+            let R=null,Lo=null; try{R=JSON.parse(x.v);}catch(e){} try{Lo=JSON.parse(loc||'null');}catch(e){}
+            if(!R) return; const m=Lo?mergeState(x.k,Lo,R):R; const ms=JSON.stringify(m); const noTs=o=>JSON.stringify(Object.assign({},o,{ts:0}));
+            if(Lo&&noTs(m)===noTs(Lo)) return;
+            if(ms!==loc){ lsSetRaw(x.k,ms); changed=true; } });
         }
         ready=true;
         if(changed){ try{ if(sessionStorage.getItem('eng-sync-reload')!=='1'){ sessionStorage.setItem('eng-sync-reload','1'); location.reload(); return; } }catch(e){} }
         try{sessionStorage.removeItem('eng-sync-reload');}catch(e){}
         push();
-      }catch(e){ ready=true; }
+      }catch(e){ console.error('sync',e); ready=true; }
     });
     if(acct) acct.onclick=()=>{
       const u=auth.currentUser;
