@@ -39,7 +39,7 @@ const FIREBASE_CONFIG = __FIREBASE_CONFIG__;
     if(key.startsWith('eng-kid:')){
       o.stars=mx(A.stars,B.stars); o.best=mergeObj(A.best,B.best,mx); o.badges=mergeObj(A.badges,B.badges,(x,y)=>x||y);
       o.seen=mergeObj(A.seen,B.seen,(x,y)=>Array.from(new Set([...(x||[]),...(y||[])])));
-      o.ph=Array.from(new Set([...(A.ph||[]),...(B.ph||[])])); o.tr=mergeObj(A.tr,B.tr,mx); o.ch=mergeObj(A.ch,B.ch,mx); o.ps=mergeObj(A.ps,B.ps,mx); o.miss=mergeObj(A.miss,B.miss,mx); o.bl=mx(A.bl,B.bl);
+      o.ph=Array.from(new Set([...(A.ph||[]),...(B.ph||[])])); o.tr=mergeObj(A.tr,B.tr,mx); o.ch=mergeObj(A.ch,B.ch,mx); o.ps=mergeObj(A.ps,B.ps,mx); o.miss=mergeObj(A.miss,B.miss,mx); o.bl=mx(A.bl,B.bl); o.spent=mx(A.spent,B.spent); o.rec=mx(A.rec,B.rec);
     } else {
       o.p=mergeObj(A.p,B.p,(x,y)=>x[0]!==y[0]?(x[0]>y[0]?x:y):(x[1]>=y[1]?x:y));
       o.next=mx(A.next,B.next); o.hist=mergeObj(A.hist,B.hist,mx); o.les=mergeObj(A.les,B.les,mx); o.sto=mergeObj(A.sto,B.sto,mx);

@@ -394,6 +394,25 @@ a.btn{text-decoration:none;text-align:center}
 .chline.on{border-color:var(--sun);background:var(--sky);transform:scale(1.02)}
 .psen{font-family:var(--f-en);direction:ltr;font-size:clamp(1.3rem,6vw,1.7rem);font-weight:650;line-height:1.5}
 .psen .pw{cursor:pointer;border-radius:6px;padding:0 2px}.psen .pw:active{background:var(--soft)}
+.petcard{display:flex;align-items:center;gap:12px;border:2px solid var(--line);background:var(--surface);border-radius:20px;padding:10px 14px;text-align:start;font-family:var(--f-kid);width:100%}
+.petcard .tt{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0}.petcard b{font-size:1.15rem}.petcard small{color:var(--muted)}
+.petmini{width:64px;height:64px;display:grid;place-items:center;flex:none}.petmini .petbody{font-size:2.6rem}
+.petstage{display:flex;justify-content:center;padding:10px 0}
+.petbody{position:relative;display:inline-block;line-height:1}
+.petstage .petbody{font-size:4rem}.petstage .petbody.s2{font-size:5.5rem}.petstage .petbody.s3,.petstage .petbody.s4{font-size:7rem}.petstage .petbody.s0{font-size:5rem}
+.petbody i{position:absolute;font-style:normal;line-height:1}
+.pw-top{font-size:.55em;top:-.38em;left:50%;transform:translateX(-50%)}.pw-face{font-size:.42em;top:.28em;left:50%;transform:translateX(-50%)}
+.pw-neck{font-size:.4em;bottom:-.05em;left:50%;transform:translateX(-50%)}.pw-side{font-size:.45em;bottom:0;right:-.45em}.pw-aura{font-size:.4em;top:-.2em;left:-.35em}
+@media (prefers-reduced-motion:no-preference){.petstage .petbody{animation:bob 2.4s ease-in-out infinite}@keyframes bob{50%{transform:translateY(-8px)}}}
+.shop{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.shopi{border:2px solid var(--line);background:var(--surface);border-radius:16px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:var(--f-kid)}
+.shopi .em{font-size:2rem}.shopi small{color:var(--muted)}.shopi b{font-size:.85rem}.shopi.on{border-color:var(--sun);background:var(--sky)}.shopi:disabled{opacity:.4}
+.recb.on{border-color:var(--bad);color:var(--bad)}
+.pinpad{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.45);display:grid;place-items:center;padding:16px}
+.pinpad .in{background:var(--surface);border-radius:20px;padding:20px;width:min(100%,340px);display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.pdots{display:flex;gap:12px}.pdots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--accent)}.pdots i.on{background:var(--accent)}
+.pkeys{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;direction:ltr}
+.pkeys button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;padding:14px 0;font-size:1.3rem}
 /* progress */
 .prog7{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;height:150px;padding:8px 4px 0;border-bottom:1px solid var(--line)}
 .prog7 .bar{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%}
@@ -460,8 +479,8 @@ function profStat(p){
   return n(s.stars||0)+' نجمة · '+n(Object.keys(s.badges||{}).length)+' شارة';
 }
 let activeId=null; try{activeId=sessionStorage.getItem('eng-active');}catch(e){}
-if(!PROFILES.find(p=>p.id===activeId)) activeId=PROFILES.length===1?PROFILES[0].id:null;
-function choose(id){ try{sessionStorage.setItem('eng-active',id); sessionStorage.removeItem('eng-tab');}catch(e){} location.reload(); }
+if(!PROFILES.find(p=>p.id===activeId)){ let last=null; try{last=localStorage.getItem('eng-last');}catch(e){} const lp=PROFILES.find(p=>p.id===last); activeId=PROFILES.length===1?PROFILES[0].id:(lp&&lp.type!=='adult'&&lsGet('eng-pin',null)?lp.id:null); }
+function choose(id){ try{sessionStorage.setItem('eng-active',id); sessionStorage.removeItem('eng-tab'); localStorage.setItem('eng-last',id);}catch(e){} location.reload(); }
 function openPicker(){
   let el=document.getElementById('picker'); if(!el){el=document.createElement('div');el.id='picker';el.className='picker';el.dir='rtl';document.body.appendChild(el);}
   let mode='list', form={name:'',type:'kidSmall',av:'👦'}, delArm=null;
@@ -471,10 +490,10 @@ function openPicker(){
       <div class="pgrid">${PROFILES.map(p=>`<div class="pcard"><button type="button" class="kback" style="all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;width:100%" data-pick="${p.id}"><span class="av">${p.av}</span><b>${esc(p.name)}</b><small>${TYPES[p.type].t}</small><span class="st">${profStat(p)}</span></button>${p.id!=='me'?`<button class="del" type="button" data-del="${p.id}">${delArm===p.id?'متأكد؟ احذف':'حذف'}</button>`:''}</div>`).join('')}
         <button class="pcard add" type="button" id="padd"><span class="av">＋</span><b>حساب جديد</b><small>لطفل أو لحد من العيلة</small></button></div>
       ${activeId?'<button class="btn ghost" type="button" id="pclose">رجوع</button>':''}</div>`;
-      el.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>choose(b.dataset.pick));
-      el.querySelectorAll('[data-del]').forEach(b=>b.onclick=e=>{e.stopPropagation(); const id=b.dataset.del; if(delArm!==id){delArm=id;paint();return;}
+      el.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{ const t=PROFILES.find(p=>p.id===b.dataset.pick); if(t&&t.type==='adult'&&getPin()&&!(activeId&&!activeIsKid())) askPin('الرقم السري عشان تفتح حساب '+t.name,()=>choose(t.id)); else choose(b.dataset.pick); });
+      el.querySelectorAll('[data-del]').forEach(b=>b.onclick=e=>{e.stopPropagation(); const id=b.dataset.del; if(delArm!==id){ if(activeIsKid()&&getPin()){ askPin('الرقم السري عشان تحذف',()=>{delArm=id;paint();}); return; } delArm=id;paint();return;}
         PROFILES=PROFILES.filter(p=>p.id!==id); saveProfiles(); try{localStorage.removeItem('eng-kid:'+id);localStorage.removeItem('eng-cards-v1:'+id);}catch(e){} delArm=null; if(activeId===id){try{sessionStorage.removeItem('eng-active')}catch(e){} location.reload();return;} paint();});
-      el.querySelector('#padd').onclick=()=>{mode='add';paint();};
+      el.querySelector('#padd').onclick=()=>{ const go=()=>{mode='add';paint();}; if(activeIsKid()&&getPin()) askPin('الرقم السري عشان تضيف حساب',go); else go(); };
       const c=el.querySelector('#pclose'); if(c) c.onclick=()=>{el.remove();};
     } else {
       el.innerHTML=`<div class="in"><h1>حساب جديد</h1><div class="pform">
@@ -509,6 +528,40 @@ function toastMsg(t){ let d=document.getElementById('btoast'); if(!d){d=document
   });
 })();
 
+async function recordClip(ms){
+    if(!navigator.mediaDevices||!window.MediaRecorder) throw new Error('unsupported');
+    const s=await navigator.mediaDevices.getUserMedia({audio:true}); const r=new MediaRecorder(s), ch=[];
+    return await new Promise((ok,no)=>{ r.ondataavailable=e=>{ if(e.data&&e.data.size) ch.push(e.data); }; r.onerror=no;
+      r.onstop=()=>{ s.getTracks().forEach(t=>t.stop()); ok(URL.createObjectURL(new Blob(ch,{type:r.mimeType||'audio/mp4'}))); };
+      r.start(); setTimeout(()=>{ try{r.stop();}catch(e){no(e);} },ms); });
+  }
+/* ---------- parent lock ---------- */
+const getPin=()=>lsGet('eng-pin',null);
+function askPin(title,cb,setMode){
+  let el=document.createElement('div'); el.className='pinpad'; el.dir='rtl'; document.body.appendChild(el);
+  let code='', first=null, err='';
+  const paint=()=>{ el.innerHTML=`<div class="in"><b>${esc(setMode?(first==null?'اختار رقم سري من ٤ أرقام':'اكتب الرقم تاني للتأكيد'):title)}</b>
+    <div class="pdots">${[0,1,2,3].map(k=>`<i class="${k<code.length?'on':''}"></i>`).join('')}</div>${err?`<div class="verdict no">${esc(err)}</div>`:''}
+    <div class="pkeys">${[1,2,3,4,5,6,7,8,9,'x',0,'ok'].map(k=>`<button type="button" data-k="${k}">${k==='x'?'⌫':k==='ok'?'إلغاء':n(k)}</button>`).join('')}</div>
+    ${!setMode?'<button class="minib" type="button" id="pforgot">نسيت الرقم؟</button>':''}</div>`;
+    el.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{ const k=b.dataset.k;
+      if(k==='ok'){ el.remove(); return; } if(k==='x'){ code=code.slice(0,-1); err=''; return paint(); }
+      code+=k; if(code.length<4) return paint();
+      if(setMode){ if(first==null){ first=code; code=''; return paint(); } if(first===code){ el.remove(); cb(code); } else { first=null; code=''; err='الرقمين مش زي بعض، جرب تاني'; paint(); } return; }
+      if(code===getPin()){ el.remove(); cb(); } else { code=''; err='الرقم غلط'; paint(); } });
+    const f=el.querySelector('#pforgot'); if(f) f.onclick=()=>{ el.remove(); mathGate(()=>{ lsSet('eng-pin',null); try{localStorage.removeItem('eng-pin');}catch(e){} toastMsg('الرقم السري اتمسح، تقدر تعمل واحد جديد'); cb(); }); }; };
+  paint();
+}
+function mathGate(cb){
+  const a=12+Math.floor(Math.random()*18), b=3+Math.floor(Math.random()*6);
+  let el=document.createElement('div'); el.className='pinpad'; el.dir='rtl'; document.body.appendChild(el);
+  el.innerHTML=`<div class="in"><b>للكبار بس: اكتب ناتج</b><div class="en" style="font-size:1.6rem">${a} × ${b} = ?</div><input class="dict-in" id="mg" inputmode="numeric" autocomplete="off"><div class="actions"><button class="btn ghost" type="button" id="mgc">إلغاء</button><button class="btn primary" type="button" id="mgo">تمام</button></div></div>`;
+  const go=()=>{ const v=el.querySelector('#mg').value.replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)); if(+v===a*b){ el.remove(); cb(); } else { el.querySelector('#mg').value=''; el.querySelector('#mg').placeholder='غلط، جرب تاني'; } };
+  el.querySelector('#mgo').onclick=go; el.querySelector('#mg').onkeydown=e=>{if(e.key==='Enter')go();}; el.querySelector('#mgc').onclick=()=>el.remove(); el.querySelector('#mg').focus();
+}
+function parentGate(cb){ if(getPin()) askPin('الرقم السري لماما أو بابا',cb); else cb(); }
+const activeIsKid=()=>{ const p=PROFILES.find(x=>x.id===activeId); return !!p&&p.type!=='adult'; };
+
 /* ---------- kids ---------- */
 function startKid(ME){
   document.getElementById('app').hidden=true; document.querySelector('.tabs').hidden=true;
@@ -519,22 +572,86 @@ function startKid(ME){
   const synth=window.speechSynthesis; let v=null;
   const pick=()=>{ if(!synth) return; const vs=synth.getVoices(); v=vs.find(x=>(x.lang||'').replace('_','-')==='en-US'&&/Samantha|Google US|Aria|Jenny|Ava/i.test(x.name))||vs.find(x=>(x.lang||'').replace('_','-')==='en-US')||null; };
   if(synth){pick(); synth.addEventListener&&synth.addEventListener('voiceschanged',pick);}
-  const say=(t,rate)=>{ if(!synth) return; try{synth.cancel(); const u=new SpeechSynthesisUtterance(t); u.lang='en-US'; if(v) u.voice=v; u.rate=rate||(small?0.75:0.85); synth.speak(u);}catch(e){} };
+  const say=(t,rate)=>{ if(!synth) return; try{ if(!arBusy) synth.cancel(); const u=new SpeechSynthesisUtterance(t); u.lang='en-US'; if(v) u.voice=v; u.rate=rate||(small?0.75:0.85); synth.speak(u);}catch(e){} };
   const SAYIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
   const shuffle=a=>{for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a};
   const PRAISE=['Great job!','Well done!','Super!','Amazing!','Good job!'];
+  /* ---------- Arabic voice instructions ---------- */
+  let vAr=null, arBusy=false, lastAr='';
+  const pickAr=()=>{ if(!synth) return; const vs=synth.getVoices(); vAr=vs.find(x=>/^ar[-_](EG|SA)/i.test(x.lang||''))||vs.find(x=>/^ar/i.test(x.lang||''))||null; };
+  if(synth){ pickAr(); synth.addEventListener&&synth.addEventListener('voiceschanged',pickAr); }
+  const arOn=()=>ME.arv!=null?ME.arv:small;
+  function sayAr(t){ if(!synth||!vAr||!t) return; try{ synth.cancel(); const u=new SpeechSynthesisUtterance(t); u.lang=vAr.lang; u.voice=vAr; u.rate=0.95; arBusy=true; u.onend=u.onerror=()=>{arBusy=false;}; setTimeout(()=>{arBusy=false;},6000); synth.speak(u);}catch(e){ arBusy=false; } }
+  function instr(force){ const el=root.querySelector('[data-ar]')||root.querySelector('.kmsg'); const t=el?(el.dataset.ar||el.textContent).trim():''; if(!t) return; if(!force&&t===lastAr) return; lastAr=t; if(force||arOn()) sayAr(t); }
+
+  /* ---------- record your voice ---------- */
+  let recBusy=false;
+  function recBtn(word){ return `<button class="kbtn c slim recb" type="button" data-rec="${esc(word)}"><span class="em">🎙️</span>سجّل صوتك</button>`; }
+  function wireRec(){ root.querySelectorAll('[data-rec]').forEach(b=>b.onclick=async()=>{ if(recBusy) return; recBusy=true; const w=b.dataset.rec; if(synth) synth.cancel();
+    b.classList.add('on'); b.innerHTML='<span class="em">🔴</span>قول الكلمة دلوقتي';
+    try{ const url=await recordClip(2600); b.innerHTML='<span class="em">👂</span>اسمع صوتك'; const a=new Audio(url);
+      a.onended=()=>{ setTimeout(()=>{ say(w); b.innerHTML='<span class="em">🎙️</span>سجّل تاني'; b.classList.remove('on'); recBusy=false; if(!ks.rec){ks.rec=0;} ks.rec++; if(ks.rec%5===1) addStars(1); },300); };
+      a.play().catch(()=>{ recBusy=false; b.classList.remove('on'); b.innerHTML='<span class="em">🎙️</span>سجّل صوتك'; });
+    }catch(e){ recBusy=false; b.classList.remove('on'); b.innerHTML='<span class="em">🎙️</span>سجّل صوتك'; const m=root.querySelector('.kmsg')||b; toastMsg('المايك مش شغال. اسمح للتطبيق يستخدم المايك من إعدادات المتصفح.'); } }); }
+
+  /* ---------- pet that grows ---------- */
+  const PETS=[['🐱','قطة'],['🐶','كلب'],['🐰','أرنب'],['🐼','باندا'],['🦊','تعلب'],['🐲','تنين']];
+  const STAGES=[[0,'بيضة'],[10,'صغنن'],[40,'شاطر'],[100,'كبير'],[200,'بطل']];
+  const SHOP=[['food','🍎','تفاحة',2],['food','🍪','بسكوتة',3],['food','🥛','لبن',2],['top','🎩','قبعة',10],['top','🎀','فيونكة',10],['top','👑','تاج',30],['face','🕶️','نضارة',15],['neck','🧣','كوفية',12],['side','🎈','بالونة',8],['side','⚽','كورة',12],['side','🎒','شنطة',20]];
+  const petStage=()=>{ let s=0; STAGES.forEach((x,k)=>{ if(ks.stars>=x[0]) s=k; }); return s; };
+  const coins=()=>ks.stars-(ks.spent||0);
+  const fedToday=()=>ks.pet&&ks.pet.fed===today();
+  function petView(big){ const st=petStage(), P=ks.pet;
+    if(st===0||!P||P.kind==null) return `<span class="petbody s0">🥚</span>`;
+    const w=P.wear||{}; return `<span class="petbody s${st}">${PETS[P.kind][0]}${w.top?`<i class="pw-top">${w.top}</i>`:''}${w.face?`<i class="pw-face">${w.face}</i>`:''}${w.neck?`<i class="pw-neck">${w.neck}</i>`:''}${w.side?`<i class="pw-side">${w.side}</i>`:''}${st>=4?'<i class="pw-aura">✨</i>':''}</span>`; }
+  function petCard(){ const st=petStage(), next=STAGES[st+1];
+    const mood=ks.pet&&ks.pet.kind!=null?(fedToday()?'مبسوط 😊':'جعان 🥺'):(st===0?'لسه بيضة':'جاهز يفقس!');
+    return `<button class="petcard" type="button" id="kpet"><span class="petmini">${petView()}</span><span class="tt"><b>${ks.pet&&ks.pet.name?esc(ks.pet.name):'صاحبي'}</b><small>${STAGES[st][1]} · ${mood}</small>${next?`<span class="goalbar"><i style="width:${Math.min(100,(ks.stars-STAGES[st][0])/(next[0]-STAGES[st][0])*100)}%"></i></span>`:''}</span></button>`; }
+  function petPage(msg){
+    const st=petStage(), P=ks.pet||(ks.pet={kind:null,wear:{},own:[]});
+    if(st>0&&P.kind==null){
+      render(`<div class="kmsg" data-ar="البيضة فقست! اختار صاحبك">🥚 البيضة فقست! اختار صاحبك</div><div class="kopts c3">${PETS.map((p,k)=>`<button class="kopt" type="button" data-kind="${k}">${p[0]}<small>${p[1]}</small></button>`).join('')}</div>`,home);
+      root.querySelectorAll('[data-kind]').forEach(b=>b.onclick=()=>{ P.kind=+b.dataset.kind; P.name=PETS[P.kind][1]; P.fed=null; ksave(); burst(); say('Hello!'); petPage('أهلًا! أنا صاحبك الجديد. أكّلني كل يوم'); });
+      instr(); return;
+    }
+    const next=STAGES[st+1];
+    render(`<div class="petstage">${petView(true)}</div>
+      <div class="kmsg ${msg?'ok':''}" data-ar="${esc(msg||(st===0?'جمّع نجوم عشان البيضة تفقس':fedToday()?'صاحبك مبسوط. اشتريله حاجة حلوة':'صاحبك جعان. أكّله'))}">${esc(msg||(st===0?'جمّع '+n(10-ks.stars)+' نجوم كمان عشان البيضة تفقس':fedToday()?'صاحبك مبسوط النهاردة':'صاحبك جعان! أكّله'))}</div>
+      <div class="tot"><div class="stat"><b>${STAGES[st][1]}</b><span>${next?'هيكبر بعد '+n(next[0]-ks.stars)+' نجمة':'وصل لأعلى مرحلة'}</span></div><div class="stat"><b>⭐ ${n(coins())}</b><span>نجوم تصرفها</span></div></div>
+      ${st>0?`<h3 class="kh">🛒 المحل</h3><div class="shop">${SHOP.map(([sl,e,t,c],k)=>{const own=sl!=='food'&&(P.own||[]).includes(e), on=sl!=='food'&&P.wear&&P.wear[sl]===e; return `<button class="shopi ${on?'on':''}" type="button" data-sh="${k}" ${!own&&coins()<c?'disabled':''}><span class="em">${e}</span><small>${esc(t)}</small><b>${own?(on?'لابسه':'البسه'):'⭐ '+n(c)}</b></button>`}).join('')}</div>`:''}`,home);
+    root.querySelectorAll('[data-sh]').forEach(b=>b.onclick=()=>{ const [sl,e,t,c]=SHOP[+b.dataset.sh]; P.own=P.own||[]; P.wear=P.wear||{};
+      if(sl==='food'){ if(coins()<c) return; ks.spent=(ks.spent||0)+c; const first=!fedToday(); P.fed=today(); ksave(); burst(); say('Yummy!'); return petPage(first?'هممم! شكرًا، أنا شبعت ومبسوط':'هممم! لذيذ'); }
+      if(P.own.includes(e)){ P.wear[sl]=P.wear[sl]===e?null:e; ksave(); return petPage(); }
+      if(coins()<c) return; ks.spent=(ks.spent||0)+c; P.own.push(e); P.wear[sl]=e; ksave(); burst(); say('Wow!'); petPage('حلو أوي! شكرًا'); });
+    instr();
+  }
+
+  /* ---------- daily time limit ---------- */
+  let useTimer=null;
+  function useTick(){ const d=today(); if(!ks.use||ks.use.d!==d) ks.use={d,m:0,x:0}; ks.use.m+=0.5; ksave(); checkLimit(); }
+  function limitLeft(){ const lim=ME.lim||0; if(!lim) return Infinity; const d=today(); const u=ks.use&&ks.use.d===d?ks.use:{m:0,x:0}; return lim+(u.x||0)-u.m; }
+  function checkLimit(){ if(limitLeft()>0) return false;
+    clearInterval(useTimer); useTimer=null; if(synth) synth.cancel(); curBack=null;
+    root.innerHTML=head()+`<div class="kcard"><span class="pic">🌙</span><b style="font-size:1.5rem">خلص وقت الإنجليزي النهاردة</b><span class="m">برافو عليك! نكمل بكرة إن شاء الله</span></div>
+      <button class="kbtn c" type="button" id="kmore"><span class="em">🔐</span>ماما أو بابا يزودوا وقت</button>`;
+    root.querySelector('#kswitch').onclick=()=>parentGate(()=>openPicker());
+    root.querySelector('#kstarsb').onclick=()=>{};
+    root.querySelector('#kmore').onclick=()=>parentGate(()=>{ ks.use.x=(ks.use.x||0)+15; ksave(); startUse(); home(); toastMsg('اتزود ١٥ دقيقة'); });
+    sayAr('خلص وقت الإنجليزي النهاردة. برافو عليك، نكمل بكرة');
+    return true; }
+  function startUse(){ if(!ME.lim) return; clearInterval(useTimer); useTimer=setInterval(()=>{ if(document.visibilityState==='visible') useTick(); },30000); }
   function burst(){ if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; const b=document.createElement('div'); b.className='burst';
     for(let k=0;k<14;k++){const i=document.createElement('i'); i.textContent=['⭐','🌟','✨'][k%3]; i.style.left='50%'; i.style.top='45%'; i.style.setProperty('--dx',(Math.random()*300-150)+'px'); i.style.setProperty('--dy',(Math.random()*-300+40)+'px'); b.appendChild(i);}
     document.body.appendChild(b); setTimeout(()=>b.remove(),1200); }
   function addStars(k){ ks.stars+=k; const w=Math.floor((today()-3)/7); if(!ks.pts||ks.pts.wk!==w) ks.pts={wk:w,v:0}; ks.pts.v+=k; ksave(); const s=document.getElementById('kstars'); if(s) s.textContent=n(ks.stars); }
-  const head=()=>`<div class="khead"><div class="hi"><button class="avbtn" type="button" id="kswitch" aria-label="تغيير المستخدم">${ME.av}</button><b>أهلًا يا ${esc(ME.name)}</b></div><button class="stars" type="button" id="kstarsb">⭐ <span id="kstars">${n(ks.stars)}</span></button></div>`;
-  const wire=()=>{ root.querySelector('#kswitch').onclick=openPicker; root.querySelector('#kstarsb').onclick=showBadges; const b=root.querySelector('#kback'); if(b) b.onclick=b._go; };
+  const head=()=>`<div class="khead"><div class="hi"><button class="avbtn" type="button" id="kswitch" aria-label="تغيير المستخدم">${ME.av}</button><b>أهلًا يا ${esc(ME.name)}</b></div><div class="hi"><button class="avbtn" type="button" id="kear" aria-label="اسمع المطلوب بالعربي">👂</button><button class="stars" type="button" id="kstarsb">⭐ <span id="kstars">${n(ks.stars)}</span></button></div></div>`;
+  const wire=()=>{ root.querySelector('#kswitch').onclick=openPicker; const ea=root.querySelector('#kear'); if(ea) ea.onclick=()=>{ if(!vAr){toastMsg('مفيش صوت عربي على الجهاز ده');return;} instr(true); }; root.querySelector('#kstarsb').onclick=showBadges; const b=root.querySelector('#kback'); if(b) b.onclick=b._go; };
   let curBack=null; backFn=()=>curBack;
-  function render(html,back){ curBack=back||null; if(synth) synth.cancel(); root.innerHTML=head()+(back?`<button class="kback" type="button" id="kback">→ رجوع</button>`:'')+html; if(back) root.querySelector('#kback')._go=back; wire(); window.scrollTo(0,0); }
+  function render(html,back){ curBack=back||null; if(synth) synth.cancel(); root.innerHTML=head()+(back?`<button class="kback" type="button" id="kback">→ رجوع</button>`:'')+html; if(back) root.querySelector('#kback')._go=back; wire(); window.scrollTo(0,0); wireRec(); setTimeout(()=>instr(),60); }
   function topic(ti){
     const t=K[ti];
     const games=small?[['tap','👂','اسمع واختار'],['mem','🃏','الذاكرة']]:[['tap','👂','اسمع واختار'],['mem','🃏','الذاكرة'],['spell','✍️','اكتب الكلمة'],['speak','🎤','قول الكلمة']];
-    render(`<div class="kcard"><span class="pic" style="font-size:4rem">${t.e}</span><b style="font-size:1.6rem">${esc(t.t)}</b></div>
+    render(`<span hidden data-ar="اختار اتعلم عشان تشوف الكلمات، أو اختار لعبة"></span><div class="kcard"><span class="pic" style="font-size:4rem">${t.e}</span><b style="font-size:1.6rem">${esc(t.t)}</b></div>
       <div class="kbig"><button class="kbtn a" type="button" id="klearn"><span class="em">📖</span>اتعلم</button>${games.map(g=>`<button class="kbtn ${g[0]==='tap'?'b':'c'}" type="button" data-g="${g[0]}"><span class="em">${g[1]}</span>${g[2]}</button>`).join('')}</div>`,home);
     root.querySelector('#klearn').onclick=()=>learn(ti,0);
     root.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>({tap:gTap,mem:gMem,spell:gSpell,speak:gSpeak})[b.dataset.g](ti));
@@ -542,10 +659,11 @@ function startKid(ME){
   function learn(ti,k){
     const t=K[ti], it=t.items[k]; const seen=ks.seen[ti]||(ks.seen[ti]=[]);
     if(!seen.includes(k)){ seen.push(k); addStars(1); }
-    render(`<div class="dots">${t.items.map((_,j)=>`<i class="${j<=k?'on':''}"></i>`).join('')}</div>
+    render(`<span hidden data-ar="اسمع الكلمة وقولها، وبعدين دوس على السهم"></span><div class="dots">${t.items.map((_,j)=>`<i class="${j<=k?'on':''}"></i>`).join('')}</div>
       <div class="kcard">${t.letters?`<span class="letter">${esc(it[5])} ${esc(it[5].toLowerCase())}</span>`:''}<span class="pic">${it[1]}</span><span class="w" lang="en">${esc(it[0])}</span>
       ${small?`<span class="m">${esc(it[2])}</span>`:`<span class="pp">${esc(it[3])}</span><span class="m">${esc(it[2])}</span>`}</div>
       <div class="knav"><button class="arr" type="button" id="kprev" ${k===0?'disabled':''} aria-label="اللي فات">→</button><button class="ksay" type="button" id="ksay" aria-label="اسمع">${SAYIC}</button><button class="arr" type="button" id="knext" aria-label="اللي بعده">${k===t.items.length-1?'✓':'←'}</button></div>`,()=>topic(ti));
+    root.querySelector('.knav').insertAdjacentHTML('afterend','<div class="center">'+recBtn(it[0])+'</div>'); wireRec();
     const sp=()=>t.letters?say(it[5]+'. '+it[0]):say(it[0]);
     root.querySelector('#ksay').onclick=sp; setTimeout(sp,250);
     root.querySelector('#kprev').onclick=()=>learn(ti,k-1);
@@ -638,10 +756,11 @@ function startKid(ME){
   function home(){
     const nextT=K.findIndex((_,i)=>!ks.badges[i]);
     const acts=[['ph','🔤','الحروف وأصواتها'],['tr','✏️','ارسم الحروف'],['bl','🧩',small?'اسمع واختار الكلمة':'اقرا الكلمة'],['ch','🎵','أناشيد'],['ps','📚','حكايات بالصور']];
-    render(`<div class="kacts">${acts.map(a=>`<button class="kact" type="button" data-a="${a[0]}"><span class="em">${a[1]}</span><b>${a[2]}</b></button>`).join('')}</div>
+    render(`<span hidden data-ar="${small?'اختار لعبة من فوق، أو موضوع من الرحلة':'اختار نشاط، أو كمّل رحلتك'}"></span>${petCard()}<div class="kacts">${acts.map(a=>`<button class="kact" type="button" data-a="${a[0]}"><span class="em">${a[1]}</span><b>${a[2]}</b></button>`).join('')}</div>
       <h3 class="kh">🗺️ رحلتي</h3>
       <div class="kmap">${K.map((t,i)=>{const s=topicStars(i); return `${i?'<i class="mlink"></i>':''}<button class="mnode p${i%4} ${i===nextT?'next':''} ${s===3?'done':''}" type="button" data-t="${i}"><span class="circ">${t.e}</span><b>${esc(t.t)}</b><span class="mst">${'⭐'.repeat(s)}${'☆'.repeat(3-s)}</span></button>`}).join('')}</div>`);
     root.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>topic(+b.dataset.t));
+    root.querySelector('#kpet').onclick=()=>petPage();
     root.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>({ph:phHome,tr:()=>phHome(true),bl:blend,ch:chHome,ps:psHome})[b.dataset.a]());
     const nx=root.querySelector('.mnode.next'); if(nx&&nextT>2) setTimeout(()=>nx.scrollIntoView({block:'center'}),50);
   }
@@ -658,6 +777,7 @@ function startKid(ME){
       <div class="kbig"><button class="kbtn b" type="button" id="psnd"><span class="em">🔊</span>صوت الحرف</button><button class="kbtn c" type="button" id="ptr"><span class="em">✏️</span>ارسمه</button></div>
       <div class="knav"><button class="arr" type="button" id="kprev" ${k===0?'disabled':''} aria-label="اللي فات">→</button><button class="ksay" type="button" id="ksay" aria-label="اسمع الكلمة">${SAYIC}</button><button class="arr" type="button" id="knext" ${k===KX.ph.length-1?'disabled':''} aria-label="اللي بعده">←</button></div>`,()=>phHome(false));
     const snd=()=>sayQ([p[1],p[1],p[3]]);
+    root.querySelector('.knav').insertAdjacentHTML('afterend','<div class="center">'+recBtn(p[3])+'</div>'); wireRec();
     root.querySelector('#psnd').onclick=snd; root.querySelector('#ksay').onclick=()=>say(p[3]); setTimeout(snd,250);
     root.querySelector('#ptr').onclick=()=>traceL(k,true,()=>phCard(k));
     root.querySelector('#kprev').onclick=()=>phCard(k-1); root.querySelector('#knext').onclick=()=>phCard(k+1);
@@ -778,7 +898,7 @@ function startKid(ME){
       <p class="sub" style="text-align:center">تاخد شارة لما تجاوب صح على ٨ من كل ١٠ في أي لعبة.</p>`,home);
   }
   window.__kid={get:()=>ks,set:r=>{ks=Object.assign(ks,r);lsSet(SKEY,ks);home();},key:SKEY};
-  home();
+  if(!checkLimit()){ startUse(); home(); }
 }
 if(!activeId){ document.getElementById('app').hidden=true; document.querySelector('.tabs').hidden=true; openPicker(); return; }
 const ME=PROFILES.find(p=>p.id===activeId);
@@ -1525,12 +1645,13 @@ function uSpeak(i,u){
   view.innerHTML=unitHead(i)+`<div class="q"><p class="sub">اسمع الجملة، وبعدين قولها بنفس الطريقة والسرعة. ${n(x.k+1)} من ${n(x.items.length)}</p>
     <div class="prompt en" lang="en" style="font-size:1.35rem">${esc(it[0])}</div><div class="sub">${esc(it[1])}</div><div class="pp">${esc(it[2])}</div>
     <div class="actions"><button class="btn ghost" type="button" data-say="${esc(it[0])}">${SPK} اسمع</button><button class="btn ghost" id="sslow" type="button">ببطء</button></div>
-    ${SR?`<button class="mic ${x.busy?'on':''}" id="smic" type="button" aria-label="سجل صوتك">${MIC}</button><p class="sub">${x.busy?'بسمعك دلوقتي...':'دوس على المايك وقول الجملة'}</p>`:`<p class="sub">المايك مش متاح في المتصفح ده، فقول الجملة بصوت عالي وبعدين دوس على قلتها.</p>`}
+    ${SR?`<button class="mic ${x.busy?'on':''}" id="smic" type="button" aria-label="سجل صوتك">${MIC}</button><p class="sub">${x.busy?'بسمعك دلوقتي...':'دوس على المايك وقول الجملة'}</p>`:`<button class="btn ghost" id="srec" type="button">${x.rec?'🔴 بسجل...':'🎙️ سجّل صوتك وقارنه'}</button><p class="sub">سجّل الجملة، وهتسمع صوتك وبعده النطق الصح عشان تقارن.</p>`}
     ${x.err?`<div class="verdict no">${esc(MICERR[x.err]||'حصلت مشكلة في المايك.')}</div>`:''}
     ${r?`<div class="verdict ${r.lv}">${r.lv==='ok'?'ممتاز، نطقك صح':r.lv==='mid'?'قريب جدًا، جرب تاني':'مش واضح، اسمع وجرب تاني'}</div><div class="heard">${esc(r.heard||'')}</div>`:''}
     <button class="btn primary" id="snx" type="button">${SR?'اللي بعدها':'قلتها، اللي بعدها'}</button></div>`;
   view.querySelector('#sslow').onclick=()=>{const s=st.slow; st.slow=true; say(it[0]); st.slow=s;};
   const m=view.querySelector('#smic'); if(m) m.onclick=()=>{ if(x.busy) return; if(synth) synth.cancel(); x.busy=true; x.err=null; x.res=null; renderUnit(); listen(it[0],res=>{ x.busy=false; if(res.err) x.err=res.err; else { x.res=judge(it[0],res.alts); if(x.res.lv==='ok') x.ok++; } renderUnit(); }); };
+  const rb=view.querySelector('#srec'); if(rb) rb.onclick=async()=>{ if(x.rec) return; x.rec=true; renderUnit(); try{ const url=await recordClip(Math.max(2500,it[0].split(' ').length*600)); x.rec=false; renderUnit(); const a=new Audio(url); a.onended=()=>setTimeout(()=>say(it[0]),300); a.play().catch(()=>{}); }catch(e){ x.rec=false; renderUnit(); toastMsg('المايك مش شغال. اسمح للتطبيق يستخدم المايك.'); } };
   view.querySelector('#snx').onclick=()=>{ x.k++; x.res=null; x.err=null; if(x.k>=x.items.length) stepDone(i,'s',x.ok); renderUnit(); };
   if(!x.played){x.played=x.k+1; setTimeout(()=>say(it[0]),300);} else if(x.played!==x.k+1){x.played=x.k+1; setTimeout(()=>say(it[0]),300);}
   wireUnit();
@@ -1685,7 +1806,14 @@ function renderKidsReport(){
   const kids=PROFILES.filter(p=>p.type!=='adult');
   if(!kids.length){ view.innerHTML=`<div class="empty"><div class="big">👨‍👧</div><h2>مفيش حسابات أطفال</h2><p class="sub">اعمل حساب لكل طفل من زرار الصورة اللي فوق.</p></div>`; return; }
   const K=D.kids, KX=D.kx||{};
-  view.innerHTML=`<div class="head"><h2>تقرير الأولاد</h2><p class="sub">كل طفل اتعلم إيه، وأكتر كلمات بيغلط فيها عشان تراجعها معاه.</p></div>`+kids.map(p=>{
+  const pin=getPin(), LIMS=[0,15,20,30,45,60];
+  view.innerHTML=`<div class="head"><h2>تقرير الأولاد</h2><p class="sub">كل طفل اتعلم إيه، وأكتر كلمات بيغلط فيها عشان تراجعها معاه.</p></div>
+  <div class="panel" style="padding:14px;display:flex;flex-direction:column;gap:12px"><b>🔐 قفل الأب والأم</b>
+    <p class="sub" style="margin:0">${pin?'الرقم السري شغال. الأولاد مش هيقدروا يفتحوا حسابك، أو يضيفوا ويحذفوا حسابات، أو يزودوا وقت اللعب من غيره.':'اعمل رقم سري عشان الأولاد ميفتحوش حسابك ولا يحذفوا حسابات. ولما يكون فيه رقم سري، الموبايل بيفتح على آخر حساب طفل اتفتح.'}</p>
+    <div class="actions"><button class="btn primary" type="button" id="pinset">${pin?'غيّر الرقم السري':'اعمل رقم سري'}</button>${pin?'<button class="btn ghost" type="button" id="pindel">شيل الرقم السري</button>':''}</div></div>
+  ${kids.map(p=>{ const arv=p.arv!=null?p.arv:p.type==='kidSmall'; return `<div class="panel" style="padding:14px;display:flex;flex-direction:column;gap:10px"><b>${esc(p.av)} إعدادات ${esc(p.name)}</b>
+    <span class="sub">وقت اللعب في اليوم</span><div class="chips">${LIMS.map(m=>`<button class="fchip" type="button" data-lim="${p.id}:${m}" aria-pressed="${(p.lim||0)===m}">${m?n(m)+' دقيقة':'من غير حد'}</button>`).join('')}</div>
+    <span class="sub">التعليمات بصوت عربي</span><div class="chips"><button class="fchip" type="button" data-arv="${p.id}:1" aria-pressed="${arv}">شغالة</button><button class="fchip" type="button" data-arv="${p.id}:0" aria-pressed="${!arv}">مقفولة</button></div></div>`}).join('')}`+kids.map(p=>{
     const k=lsGet(profKey(p),{})||{}; const seen=Object.values(k.seen||{}).reduce((a,x)=>a+x.length,0), total=K.reduce((a,t)=>a+t.items.length,0);
     const topics=Object.keys(k.seen||{}).length, badges=Object.keys(k.badges||{}).length, ph=(k.ph||[]).length, tr=Object.keys(k.tr||{}).length, ps=Object.keys(k.ps||{}).length;
     const miss=Object.entries(k.miss||{}).sort((a,b)=>b[1]-a[1]).slice(0,8);
@@ -1694,6 +1822,11 @@ function renderKidsReport(){
     return `<div class="panel" style="padding:14px;display:flex;flex-direction:column;gap:10px"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:2rem">${esc(p.av)}</span><b style="flex:1;font-size:1.15rem">${esc(p.name)}</b><span class="sub">${esc(TYPES[p.type].t)} · ${ago(k.ts)}</span></div>
       <div class="tot"><div class="stat"><b>${n(k.stars||0)}</b><span>نجمة</span></div><div class="stat"><b>${n(badges)} من ${n(K.length)}</b><span>شارة</span></div><div class="stat"><b>${n(seen)} من ${n(total)}</b><span>كلمة شافها</span></div><div class="stat"><b>${n(topics)}</b><span>موضوع بدأه</span></div><div class="stat"><b>${n(ph)} من ٢٦</b><span>صوت حرف</span></div><div class="stat"><b>${n(tr)}</b><span>حرف رسمه</span></div><div class="stat"><b>${n(ps)} من ${n((KX.ps||[]).length)}</b><span>حكاية</span></div><div class="stat"><b>${n((k.pts&&k.pts.wk===wk())?k.pts.v:0)}</b><span>نجمة الأسبوع ده</span></div></div>
       ${miss.length?`<b>كلمات محتاج يراجعها</b><div class="chips">${miss.map(([w,c])=>`<button class="fchip" type="button" data-say="${esc(w)}">${emo(w)} ${esc(w)} · ${esc(ar(w))}</button>`).join('')}</div>`:'<p class="sub">مفيش كلمات بيغلط فيها كتير لحد دلوقتي.</p>'}</div>`;}).join('');
+  view.querySelector('#pinset').onclick=()=>askPin('',c=>{ lsSet('eng-pin',c); toastMsg('الرقم السري اتحفظ'); renderKidsReport(); },true);
+  const pd=view.querySelector('#pindel'); if(pd) pd.onclick=()=>{ try{localStorage.removeItem('eng-pin');}catch(e){} toastMsg('الرقم السري اتشال'); renderKidsReport(); };
+  const setP=(id,f)=>{ const p=PROFILES.find(x=>x.id===id); if(!p) return; f(p); saveProfiles(); const y=window.scrollY; renderKidsReport(); window.scrollTo(0,y); };
+  view.querySelectorAll('[data-lim]').forEach(b=>b.onclick=()=>{ const [id,m]=b.dataset.lim.split(':'); setP(id,p=>{p.lim=+m;}); });
+  view.querySelectorAll('[data-arv]').forEach(b=>b.onclick=()=>{ const [id,v]=b.dataset.arv.split(':'); setP(id,p=>{p.arv=v==='1';}); });
 }
 
 /* ---------- daily reminder (calendar file) ---------- */
@@ -1739,7 +1872,7 @@ const HUBS={
   {k:'mis',t:'أخطائي',d:'الأسئلة والجمل اللي غلطت فيها لحد ما تتقنها',f:()=>renderMistakes(),meta:()=>st.mis&&st.mis.length?n(st.mis.length)+' للمراجعة':''}]},
  learn:{t:'دروس',sub:'القواعد والمحادثات والجمل الجاهزة.',items:[
   {k:'crs',t:'المنهج',d:'٥٦ وحدة متسلسلة على ٦ مستويات ومسار للشغل',f:()=>renderCourse(),meta:()=>{const d=Object.values(st.crs||{}).filter(c=>c.done).length;return d?n(d)+' وحدة خلصتها':''}},
-  {k:'kidsrep',t:'تقرير الأولاد',d:'كل طفل اتعلم إيه وبيغلط في إيه',f:()=>renderKidsReport(),show:()=>PROFILES.some(p=>p.type!=='adult')},
+  {k:'kidsrep',t:'الأولاد: تقرير وإعدادات',d:'تقدم كل طفل، والرقم السري، ووقت اللعب',f:()=>renderKidsReport(),show:()=>PROFILES.some(p=>p.type!=='adult')},
   {k:'admin',t:'لوحة الأدمن',d:'مين سجل دخول وكل واحد وصل لفين',f:()=>renderAdmin(),show:()=>!!window.__admin},
   {k:'mine',t:'كلماتي',d:'كل كلماتك ومستوى حفظ كل واحدة',f:()=>renderMine(),meta:()=>{const c=Object.keys(st.p).length;return c?n(c)+' كلمة':''}},
   {k:'prog',t:'تقدمي',d:'آخر ٧ أيام وهدفك اليومي',f:()=>renderProgress(),meta:()=>{const t=(st.hist||{})[today()]||0;return t?n(t)+' كلمة النهاردة':''}},
@@ -1831,7 +1964,7 @@ const FIREBASE_CONFIG = {"apiKey":"AIzaSyCc0HzPPYbm_lB34t8p8ULplceoQbHaHe8","aut
     if(key.startsWith('eng-kid:')){
       o.stars=mx(A.stars,B.stars); o.best=mergeObj(A.best,B.best,mx); o.badges=mergeObj(A.badges,B.badges,(x,y)=>x||y);
       o.seen=mergeObj(A.seen,B.seen,(x,y)=>Array.from(new Set([...(x||[]),...(y||[])])));
-      o.ph=Array.from(new Set([...(A.ph||[]),...(B.ph||[])])); o.tr=mergeObj(A.tr,B.tr,mx); o.ch=mergeObj(A.ch,B.ch,mx); o.ps=mergeObj(A.ps,B.ps,mx); o.miss=mergeObj(A.miss,B.miss,mx); o.bl=mx(A.bl,B.bl);
+      o.ph=Array.from(new Set([...(A.ph||[]),...(B.ph||[])])); o.tr=mergeObj(A.tr,B.tr,mx); o.ch=mergeObj(A.ch,B.ch,mx); o.ps=mergeObj(A.ps,B.ps,mx); o.miss=mergeObj(A.miss,B.miss,mx); o.bl=mx(A.bl,B.bl); o.spent=mx(A.spent,B.spent); o.rec=mx(A.rec,B.rec);
     } else {
       o.p=mergeObj(A.p,B.p,(x,y)=>x[0]!==y[0]?(x[0]>y[0]?x:y):(x[1]>=y[1]?x:y));
       o.next=mx(A.next,B.next); o.hist=mergeObj(A.hist,B.hist,mx); o.les=mergeObj(A.les,B.les,mx); o.sto=mergeObj(A.sto,B.sto,mx);
