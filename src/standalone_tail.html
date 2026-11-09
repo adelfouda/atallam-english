@@ -39,11 +39,11 @@ const FIREBASE_CONFIG = __FIREBASE_CONFIG__;
     if(key.startsWith('eng-kid:')){
       o.stars=mx(A.stars,B.stars); o.best=mergeObj(A.best,B.best,mx); o.badges=mergeObj(A.badges,B.badges,(x,y)=>x||y);
       o.seen=mergeObj(A.seen,B.seen,(x,y)=>Array.from(new Set([...(x||[]),...(y||[])])));
-      o.ph=Array.from(new Set([...(A.ph||[]),...(B.ph||[])])); o.tr=mergeObj(A.tr,B.tr,mx); o.ch=mergeObj(A.ch,B.ch,mx); o.ps=mergeObj(A.ps,B.ps,mx); o.miss=mergeObj(A.miss,B.miss,mx); o.bl=mx(A.bl,B.bl); o.spent=mx(A.spent,B.spent); o.rec=mx(A.rec,B.rec);
+      o.ph=Array.from(new Set([...(A.ph||[]),...(B.ph||[])])); o.tr=mergeObj(A.tr,B.tr,mx); o.ch=mergeObj(A.ch,B.ch,mx); o.ps=mergeObj(A.ps,B.ps,mx); o.miss=mergeObj(A.miss,B.miss,mx); o.bl=mx(A.bl,B.bl); o.spent=mx(A.spent,B.spent); o.zs=Array.from(new Set([...(A.zs||[]),...(B.zs||[])])); o.dg=mergeObj(A.dg,B.dg,mx); o.rec=mx(A.rec,B.rec);
     } else {
       o.p=mergeObj(A.p,B.p,(x,y)=>x[0]!==y[0]?(x[0]>y[0]?x:y):(x[1]>=y[1]?x:y));
       o.next=mx(A.next,B.next); o.hist=mergeObj(A.hist,B.hist,mx); o.les=mergeObj(A.les,B.les,mx); o.sto=mergeObj(A.sto,B.sto,mx);
-      o.streak=mx(A.streak,B.streak); o.last=mx(A.last,B.last); o.placed=newer.placed||older.placed;
+      o.streak=mx(A.streak,B.streak); o.last=mx(A.last,B.last); o.placed=newer.placed||older.placed; o.lq=mx(A.lq,B.lq);
       o.crs=mergeObj(A.crs,B.crs,(x,y)=>Object.assign({},x,y,{done:!!(x.done||y.done),t:mx(x.t,y.t),s:mergeObj(x.s,y.s,mx),wt:y.wt||x.wt}));
       const mk=m=>JSON.stringify(m); const seenM=new Set(); o.mis=[...(older.mis||[]),...(newer.mis||[])].filter(m=>{const k=mk(m); if(seenM.has(k)) return false; seenM.add(k); return true;}).slice(-150);
       if(o.plan&&o.plan.queue) o.plan=Object.assign({},o.plan,{queue:o.plan.queue.filter(i=>!(o.p[i]&&o.p[i][0]>0)||(o.plan.done||[]).includes(i))});

@@ -85,6 +85,7 @@ h2{font-size:1.1rem;font-weight:600;margin:0;text-wrap:balance}
 .btn.bad{background:var(--bad-bg);color:var(--bad)}
 .btn.wide{grid-column:1/-1}
 a.btn{text-decoration:none;text-align:center}
+.btn>svg{width:1.15em;height:1.15em;vertical-align:-.2em;margin-inline-end:4px}
 #view>.btn,#view>a.btn{width:100%;display:block;text-align:center}
 .lvsec>.btn{width:100%}
 
@@ -352,7 +353,7 @@ a.btn{text-decoration:none;text-align:center}
 
 .kacts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .kact{border:0;border-radius:20px;padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:var(--f-kid);font-size:1.05rem;background:var(--sky);color:var(--ink)}
-.kact:nth-child(2){background:var(--sun);color:var(--sun-ink)}.kact:nth-child(5){grid-column:1/-1;background:var(--accent);color:var(--accent-ink)}
+.kact:nth-child(2),.kact:nth-child(6){background:var(--sun);color:var(--sun-ink)}.kact:nth-child(3){background:var(--good-bg)}.kact:last-child:nth-child(odd){grid-column:1/-1;background:var(--accent);color:var(--accent-ink)}
 .kact .em{font-size:2.2rem;line-height:1.1}
 .kh{font-family:var(--f-kid);font-size:1.3rem;margin:6px 0 0}
 .kmap{display:flex;flex-direction:column;align-items:center;padding:4px 0 10px}
@@ -401,6 +402,20 @@ a.btn{text-decoration:none;text-align:center}
 .pdots{display:flex;gap:12px}.pdots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--accent)}.pdots i.on{background:var(--accent)}
 .pkeys{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;direction:ltr}
 .pkeys button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;padding:14px 0;font-size:1.3rem}
+.lrule summary{display:flex;align-items:center;gap:8px}.lrule summary>span:last-child{margin-inline-start:auto}
+.lx{margin:6px 0 10px;line-height:1.8}.lexn{font-weight:600;margin:10px 0 4px;color:var(--accent)}
+.lwrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.lwrow .mid{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}.lwrow small{color:var(--muted)}
+.lw{font-family:var(--f-en);direction:ltr;font-size:1.3rem;font-weight:600;min-width:6.5rem;text-align:left}
+.lw .sl,.word .sl{color:var(--muted);opacity:.45;text-decoration:line-through;font-weight:400}
+.dgl{color:var(--accent);background:var(--soft);border-radius:4px;padding:0 1px}
+.dgp{font-family:var(--f-en);direction:ltr;background:var(--accent);color:var(--accent-ink);border-radius:8px;padding:1px 8px;font-size:1.05rem}
+.ltiles{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.ltiles button{min-width:42px;height:50px;border-radius:10px;border:2px solid var(--line);background:var(--surface);font-family:var(--f-en);font-size:1.5rem;font-weight:600;color:var(--ink)}
+.ltiles button.on{border-color:var(--accent);background:var(--soft)}.ltiles button.right{border-color:var(--good);background:var(--good-bg)}.ltiles button.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.zz{position:relative;display:inline-block;color:var(--muted);opacity:.5}.zz i{position:absolute;top:-1.1em;left:50%;transform:translateX(-50%);font-size:.45em;font-style:normal;opacity:1}
+.bltiles button.zzb{border-color:var(--sun);background:var(--sky);opacity:.6}
+.kopt small b.dgl{font-weight:800}.kopt.dgo{font-family:var(--f-en);font-size:2rem;font-weight:700;direction:ltr}
 /* progress */
 .prog7{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;height:150px;padding:8px 4px 0;border-bottom:1px solid var(--line)}
 .prog7 .bar{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%}
@@ -739,17 +754,17 @@ function startKid(ME){
   const KX=D.kx||{ph:[],cvc:[],ch:[],ps:[]};
   const SND={}; KX.ph.forEach(p=>SND[p[0].toLowerCase()]=p[1]);
   const missW=w=>{ ks.miss=ks.miss||{}; ks.miss[w]=(ks.miss[w]||0)+1; ksave(); };
-  const sayQ=(list,gap)=>{ if(!synth) return; synth.cancel(); list.forEach(t=>{ const u=new SpeechSynthesisUtterance(t); u.lang='en-US'; if(v) u.voice=v; u.rate=small?0.7:0.8; synth.speak(u); }); };
+  const sayQ=(list,gap)=>{ if(!synth) return; if(!arBusy) synth.cancel(); list.forEach(t=>{ const u=new SpeechSynthesisUtterance(t); u.lang='en-US'; if(v) u.voice=v; u.rate=small?0.7:0.8; synth.speak(u); }); };
   function topicStars(i){ const t=K[i], s=(ks.seen[i]||[]).length; return (s>0?1:0)+(s>=t.items.length?1:0)+(ks.badges[i]?1:0); }
   function home(){
     const nextT=K.findIndex((_,i)=>!ks.badges[i]);
-    const acts=[['ph','🔤','الحروف وأصواتها'],['tr','✏️','ارسم الحروف'],['bl','🧩',small?'اسمع واختار الكلمة':'اقرا الكلمة'],['ch','🎵','أناشيد'],['ps','📚','حكايات بالصور']];
+    const acts=[['ph','🔤','الحروف وأصواتها'],['tr','✏️','ارسم الحروف'],['sl','🤫','الحروف النايمة'],['dg','👯','حرفين صوت واحد'],['bl','🧩',small?'اسمع واختار الكلمة':'اقرا الكلمة'],['ch','🎵','أناشيد'],['ps','📚','حكايات بالصور']];
     render(`<span hidden data-ar="${small?'اختار لعبة من فوق، أو موضوع من الرحلة':'اختار نشاط، أو كمّل رحلتك'}"></span>${petCard()}<div class="kacts">${acts.map(a=>`<button class="kact" type="button" data-a="${a[0]}"><span class="em">${a[1]}</span><b>${a[2]}</b></button>`).join('')}</div>
       <h3 class="kh">🗺️ رحلتي</h3>
       <div class="kmap">${K.map((t,i)=>{const s=topicStars(i); return `${i?'<i class="mlink"></i>':''}<button class="mnode p${i%4} ${i===nextT?'next':''} ${s===3?'done':''}" type="button" data-t="${i}"><span class="circ">${t.e}</span><b>${esc(t.t)}</b><span class="mst">${'⭐'.repeat(s)}${'☆'.repeat(3-s)}</span></button>`}).join('')}</div>`);
     root.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>topic(+b.dataset.t));
     root.querySelector('#kpet').onclick=()=>petPage();
-    root.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>({ph:phHome,tr:()=>phHome(true),bl:blend,ch:chHome,ps:psHome})[b.dataset.a]());
+    root.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>({ph:phHome,tr:()=>phHome(true),sl:kSilMenu,dg:kDgMenu,bl:blend,ch:chHome,ps:psHome})[b.dataset.a]());
     const nx=root.querySelector('.mnode.next'); if(nx&&nextT>2) setTimeout(()=>nx.scrollIntoView({block:'center'}),50);
   }
   /* letters and their sounds */
@@ -879,6 +894,74 @@ function startKid(ME){
     root.querySelectorAll('.pw').forEach(w=>w.onclick=()=>say(w.dataset.w,0.7));
     const sp=()=>say(sc[1]); root.querySelector('#ksay').onclick=sp; setTimeout(sp,300);
     root.querySelector('#kprev').onclick=()=>pstory(si,k-1); root.querySelector('#knext').onclick=()=>pstory(si,k+1);
+  }
+  /* ---------- kids: sleeping letters & letter teams ---------- */
+  const KS=(D.snd&&D.snd.ks)||[], KDG=(D.snd&&D.snd.kd)||[];
+  const zzW=(w,idx)=>{ const s=new Set(idx); return [...w].map((c,k)=>s.has(k)?`<span class="zz">${esc(c)}<i>💤</i></span>`:esc(c)).join(''); };
+  function kSilMenu(){
+    render(`<span hidden data-ar="فيه حروف بتتكتب بس نايمة، يعني مبننطقهاش. اختار اتعلم أو العب"></span>
+      <div class="kcard"><span class="pic" style="font-size:4rem">🤫</span><b style="font-size:1.4rem">الحروف النايمة</b><span class="m">حروف بنكتبها بس مبنقولهاش</span><span class="w" lang="en" dir="ltr">${zzW('knife',[0])}</span></div>
+      <div class="kbig"><button class="kbtn a" type="button" id="zl"><span class="em">📖</span>اتعلم</button><button class="kbtn b" type="button" id="zg"><span class="em">🎮</span>لاقي الحرف النايم</button></div>`,home);
+    root.querySelector('#zl').onclick=()=>kSil(0); root.querySelector('#zg').onclick=kSilGame;
+  }
+  function kSil(k){
+    const it=KS[k]; ks.zs=ks.zs||[]; if(!ks.zs.includes(k)){ ks.zs.push(k); addStars(1); }
+    render(`<span hidden data-ar="الحرف اللي عليه نوم ده نايم، مبنقولوش. اسمع الكلمة"></span><div class="dots">${KS.map((_,j)=>`<i class="${j<=k?'on':''}"></i>`).join('')}</div>
+      <div class="kcard"><span class="pic">${it[2]}</span><span class="w zw" lang="en" dir="ltr">${zzW(it[0],it[1])}</span>${small?'':`<span class="pp">${esc(it[4])}</span>`}<span class="m">${esc(it[3])}</span><span class="m sub">الحرف ${esc(it[1].map(i=>it[0][i]).join(''))} نايم 😴</span></div>
+      <div class="knav"><button class="arr" type="button" id="kprev" ${k===0?'disabled':''} aria-label="اللي فات">→</button><button class="ksay" type="button" id="ksay" aria-label="اسمع">${SAYIC}</button><button class="arr" type="button" id="knext" aria-label="اللي بعده">${k===KS.length-1?'✓':'←'}</button></div>
+      <div class="center">${recBtn(it[0])}</div>`,kSilMenu);
+    const sp=()=>say(it[0]); root.querySelector('#ksay').onclick=sp; setTimeout(sp,300);
+    root.querySelector('#kprev').onclick=()=>kSil(k-1); root.querySelector('#knext').onclick=()=>k<KS.length-1?kSil(k+1):kSilGame();
+  }
+  function kSilGame(){
+    const order=shuffle(KS.map((_,j)=>j)).slice(0,6); let r=0, score=0;
+    const q=()=>{ if(r>=order.length) return endAct('🤫',score,order.length,kSilGame);
+      const it=KS[order[r]]; let miss=false;
+      render(`<div class="dots">${order.map((_,j)=>`<i class="${j<r?'on':''}"></i>`).join('')}</div>
+        <div class="kcard"><span class="pic">${it[2]}</span><span class="m">${esc(it[3])}</span></div>
+        <div class="kmsg" id="zmsg">دوس على الحرف النايم</div>
+        <div class="bltiles">${[...it[0]].map((c,k)=>`<button type="button" data-z="${k}">${esc(c)}</button>`).join('')}</div>`,kSilMenu);
+      setTimeout(()=>say(it[0]),300);
+      root.querySelectorAll('[data-z]').forEach(b=>b.onclick=()=>{ const k=+b.dataset.z, m=root.querySelector('#zmsg');
+        if(it[1].includes(k)){ root.querySelectorAll('[data-z]').forEach(x=>{ x.disabled=true; if(it[1].includes(+x.dataset.z)) x.classList.add('on','zzb'); });
+          if(!miss){score++;addStars(1);} burst(); m.className='kmsg ok'; m.textContent='صح! الحرف ده نايم 😴'; say(it[0]); setTimeout(()=>{r++;q();},1700); }
+        else { if(!miss) missW(it[0]); miss=true; b.classList.remove('wrong'); void b.offsetWidth; b.classList.add('wrong'); m.className='kmsg no'; m.textContent='الحرف ده صاحي، بنقوله. دور تاني'; } });
+    }; q();
+  }
+  function kDgMenu(){
+    ks.dg=ks.dg||{};
+    render(`<span hidden data-ar="ساعات حرفين يمسكوا إيد بعض ويقولوا صوت واحد. اختار حرفين"></span>
+      <div class="kmsg">حرفين بيمسكوا إيد بعض ويقولوا صوت واحد</div>
+      <div class="center"><button class="kbtn b slim" type="button" id="dgg"><span class="em">🎮</span>العب</button></div>
+      <div class="lgrid">${KDG.map((g,i)=>`<button class="lt ${ks.dg[i]?'done':''}" type="button" data-d="${i}"><b>${esc(g.p)}</b><span>${g.w[0][1]}</span></button>`).join('')}</div>`,home);
+    root.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>kDg(+b.dataset.d)); root.querySelector('#dgg').onclick=kDgGame;
+  }
+  function kDg(i){
+    const g=KDG[i]; if(!ks.dg[i]){ ks.dg[i]=1; addStars(1); }
+    const hl=w=>{ const at=w.indexOf(g.p); return at<0?esc(w):esc(w.slice(0,at))+`<b class="dgl">${esc(g.p)}</b>`+esc(w.slice(at+g.p.length)); };
+    render(`<span hidden data-ar="الحرفين دول مع بعض بيقولوا ${esc(g.s)}. دوس على كل صورة واسمع"></span>
+      <div class="kcard"><span class="letter big2" dir="ltr">${esc(g.p)}</span><span class="m">صوتهم: ${esc(g.s)}</span></div>
+      <div class="kopts c3">${g.w.map((w,k)=>`<button class="kopt" type="button" data-w="${k}">${w[1]}<small dir="ltr">${hl(w[0])}</small></button>`).join('')}</div>
+      <div class="knav"><button class="arr" type="button" id="kprev" ${i===0?'disabled':''} aria-label="اللي فات">→</button><button class="ksay" type="button" id="ksay" aria-label="اسمع">${SAYIC}</button><button class="arr" type="button" id="knext" ${i===KDG.length-1?'disabled':''} aria-label="اللي بعده">←</button></div>`,kDgMenu);
+    root.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>say(g.w[+b.dataset.w][0]));
+    const sp=()=>sayQ(g.w.map(w=>w[0])); root.querySelector('#ksay').onclick=sp; setTimeout(sp,350);
+    root.querySelector('#kprev').onclick=()=>kDg(i-1); root.querySelector('#knext').onclick=()=>kDg(i+1);
+  }
+  function kDgGame(){
+    const all=KDG.flatMap((g,i)=>g.w.map(w=>({w,i}))); const order=shuffle(all.slice()).slice(0,6); let r=0, score=0;
+    const q=()=>{ if(r>=order.length) return endAct('👯',score,order.length,kDgGame);
+      const it=order[r], g=KDG[it.i]; let miss=false;
+      const opts=shuffle([it.i,...shuffle(KDG.map((_,j)=>j).filter(j=>j!==it.i)).slice(0,2)]);
+      const masked=it.w[0].replace(g.p,'__');
+      render(`<div class="dots">${order.map((_,j)=>`<i class="${j<r?'on':''}"></i>`).join('')}</div>
+        <div class="kcard"><span class="pic">${it.w[1]}</span><span class="w" lang="en" dir="ltr" id="dgw">${esc(masked)}</span></div>
+        <div class="kmsg" id="dmsg">اسمع واختار الحرفين الناقصين</div>
+        <div class="kopts c3">${opts.map(o=>`<button class="kopt dgo" type="button" data-o="${o}">${esc(KDG[o].p)}</button>`).join('')}</div>`,kDgMenu);
+      setTimeout(()=>say(it.w[0]),300);
+      root.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{ const o=+b.dataset.o, m=root.querySelector('#dmsg');
+        if(o===it.i){ b.classList.add('right'); root.querySelector('#dgw').innerHTML=esc(it.w[0]).replace(esc(g.p),`<b class="dgl">${esc(g.p)}</b>`); if(!miss){score++;addStars(1);} burst(); m.className='kmsg ok'; m.textContent='برافو!'; say(it.w[0]); root.querySelectorAll('[data-o]').forEach(x=>x.disabled=true); setTimeout(()=>{r++;q();},1500); }
+        else { if(!miss) missW(it.w[0]); miss=true; b.classList.remove('wrong'); void b.offsetWidth; b.classList.add('wrong'); m.className='kmsg no'; m.textContent='حاول تاني'; setTimeout(()=>say(it.w[0]),300); } });
+    }; q();
   }
   function showBadges(){
     render(`<div class="kcard"><span class="pic" style="font-size:4rem">⭐</span><b style="font-size:2.2rem">${n(ks.stars)}</b><span class="m">نجمة جمعتها</span></div>
@@ -1103,6 +1186,7 @@ const ICON={
  gram:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h7a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H4zM20 5h-7a2 2 0 0 0-2 2"/><path d="M20 5v13h-7"/></svg>',
  conv:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h11v8H8l-4 3z"/><path d="M15 9h5v8l-3-2h-6v-2"/></svg>',
  phr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v10H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>',
+ snd:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 18l4-12 4 12M5.5 14h5"/><path d="M14 9h6M14 15h6" stroke-dasharray="2 2"/></svg>',
  crs:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7l9-4 9 4-9 4z"/><path d="M7 9v5c0 1.5 2.2 3 5 3s5-1.5 5-3V9"/><path d="M21 7v6"/></svg>',
  mis:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>',
  kidsrep:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="10" r="2.2"/><path d="M3 20c0-3 2.2-5 5-5s5 2 5 5M13 20c0-2.4 1.8-4 4-4s4 1.6 4 4"/></svg>',
@@ -1827,6 +1911,61 @@ function reminderICS(hhmm){
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'})); a.download='atallam-reminder.ics'; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
 }
 
+/* ---------- silent letters & letter teams ---------- */
+const SND=D.snd||{sil:[],dg:[],ks:[],kd:[]};
+let lx={mode:'sil',q:null};
+const markW=(w,idx,cls)=>{ const set=new Set(idx); return [...w].map((c,k)=>set.has(k)?`<b class="${cls}">${esc(c)}</b>`:esc(c)).join(''); };
+function renderLetters(){
+  const m=lx.mode;
+  let body='';
+  if(m==='sil') body=SND.sil.map((g,k)=>`<details class="panel lrule" ${k===0?'open':''}><summary>${esc(g.t)}<span>${n(g.w.length)} كلمة</span></summary>
+    <p class="lx">${esc(g.x)}</p>
+    ${g.w.map(r=>`<div class="lwrow"><span class="lw en" lang="en">${markW(r[0],r[1],'sl')}</span><div class="mid"><small>النطق: ${esc(r[3])}</small><small>${esc(r[2])}</small></div>${accBtns(r[0])}</div>`).join('')}
+    ${g.ex&&g.ex.length?`<div class="lexn">${esc(g.exn)}</div>${g.ex.map(e=>`<div class="lwrow"><span class="lw en" lang="en">${esc(e[0])}</span><div class="mid"><small>النطق: ${esc(e[2])}</small><small>${esc(e[1])}</small></div><button class="iconbtn" type="button" data-say="${esc(e[0].replace(' ← ',', '))}" aria-label="اسمع">${SPK}</button></div>`).join('')}`:''}</details>`).join('');
+  else if(m==='dg') body=SND.dg.map((g,k)=>`<details class="panel lrule" ${k===0?'open':''}><summary><span class="dgp en">${esc(g.p)}</span>${esc(g.s)}<span>${n(g.w.length)} كلمة</span></summary>
+    <p class="lx">${esc(g.x)}</p>
+    ${g.w.map(r=>`<div class="lwrow"><span class="lw en" lang="en">${markW(r[0],r[1],'dgl')}</span><div class="mid"><small>النطق: ${esc(r[3])}</small><small>${esc(r[2])}</small></div>${accBtns(r[0])}</div>`).join('')}</details>`).join('');
+  else return lettersQuiz();
+  view.innerHTML=`<div class="head"><h2>الحروف الصامتة والمركبة</h2><p class="sub">${m==='sil'?'الحروف الباهتة اللي عليها خط بتتكتب بس مبتتنطقش. افتح كل قاعدة واسمع الكلمات.':'الحروف الملونة بتتنطق مع بعض صوت واحد. افتح كل مجموعة واسمع الأمثلة.'}</p></div>
+  <div class="modes"><button class="fchip" type="button" data-lm="sil" aria-pressed="${m==='sil'}">الحروف الصامتة</button><button class="fchip" type="button" data-lm="dg" aria-pressed="${m==='dg'}">الحروف المركبة</button><button class="fchip" type="button" data-lm="q" aria-pressed="false">اختبر نفسك</button></div>${body}`;
+  view.querySelectorAll('[data-lm]').forEach(b=>b.onclick=()=>{lx.mode=b.dataset.lm; lx.q=null; renderLetters(); window.scrollTo(0,0);});
+}
+function lettersQuiz(){
+  if(!lx.q){ const items=[];
+    shuffle(SND.sil.flatMap(g=>g.w.filter(r=>r[1].length)).slice()).slice(0,5).forEach(r=>items.push({t:'s',r}));
+    shuffle(SND.dg.flatMap(g=>g.w.map(r=>({r,p:r[0].slice(r[1][0],r[1][r[1].length-1]+1)}))).slice()).slice(0,5).forEach(o=>items.push({t:'d',r:o.r,p:o.p}));
+    lx.q={items:shuffle(items),k:0,sc:0,sel:new Set(),done:false,opt:null}; }
+  const Q=lx.q;
+  const modes=`<div class="modes"><button class="fchip" type="button" data-lm="sil" aria-pressed="false">الحروف الصامتة</button><button class="fchip" type="button" data-lm="dg" aria-pressed="false">الحروف المركبة</button><button class="fchip" type="button" data-lm="q" aria-pressed="true">اختبر نفسك</button></div>`;
+  if(Q.k>=Q.items.length){
+    view.innerHTML=`<div class="head"><h2>اختبر نفسك</h2></div>${modes}<div class="empty"><div class="big">${n(Q.sc)} / ${n(Q.items.length)}</div><h2>${Q.sc>=8?'ممتاز!':'كويس، راجع القواعد وجرب تاني'}</h2><button class="btn primary" id="lqa" type="button">جولة تانية</button></div>`;
+    view.querySelector('#lqa').onclick=()=>{lx.q=null;renderLetters();};
+    view.querySelectorAll('[data-lm]').forEach(b=>b.onclick=()=>{lx.mode=b.dataset.lm; lx.q=null; renderLetters();}); return;
+  }
+  const it=Q.items[Q.k], r=it.r, w=r[0];
+  let inner='';
+  if(it.t==='s'){
+    const ok=Q.done&&r[1].length===Q.sel.size&&r[1].every(i=>Q.sel.has(i));
+    inner=`<p class="sub">دوس على الحرف أو الحروف اللي مبتتنطقش، وبعدين صحح.</p>
+      <div class="ltiles" dir="ltr">${[...w].map((c,k)=>`<button type="button" data-li="${k}" class="${Q.sel.has(k)?'on':''} ${Q.done&&r[1].includes(k)?'right':''} ${Q.done&&Q.sel.has(k)&&!r[1].includes(k)?'wrong':''}" ${Q.done?'disabled':''}>${esc(c)}</button>`).join('')}</div>
+      <div class="sub">${esc(r[2])}</div>
+      ${Q.done?`<div class="verdict ${ok?'ok':'no'}">${ok?'صح':'الحروف الصامتة هي اللي باللون الأخضر'}</div><div class="en lw">${markW(w,r[1],'sl')}</div><div class="pp">النطق: ${esc(r[3])}</div><button class="btn primary" id="lqn" type="button">اللي بعدها</button>`:`<button class="btn primary" id="lqc" type="button" ${Q.sel.size?'':'disabled'}>صحح</button>`}`;
+  } else {
+    if(!Q.opt){ const others=shuffle([...new Set(SND.dg.flatMap(g=>g.w.map(x=>x[0].slice(x[1][0],x[1][x[1].length-1]+1))))].filter(p=>p!==it.p)).slice(0,2); Q.opt=shuffle([it.p,...others]); }
+    const masked=[...w].map((c,k)=>r[1].includes(k)?'_':c).join('');
+    inner=`<p class="sub">اسمع الكلمة واختار الحروف الناقصة.</p><div class="word en" lang="en" dir="ltr">${Q.done?markW(w,r[1],'dgl'):esc(masked)}</div><div class="sub">${esc(r[2])}</div>
+      <div class="opts">${Q.opt.map(o=>{let c='opt en'; if(Q.done){ if(o===it.p) c+=' right'; else if(o===Q.pick) c+=' wrong'; } return `<button class="${c}" type="button" data-lo="${esc(o)}" ${Q.done?'disabled':''}>${esc(o)}</button>`}).join('')}</div>
+      ${Q.done?`<div class="pp">النطق: ${esc(r[3])}</div><button class="btn primary" id="lqn" type="button">اللي بعدها</button>`:''}`;
+  }
+  view.innerHTML=`<div class="head"><h2>اختبر نفسك</h2><p class="sub">سؤال ${n(Q.k+1)} من ${n(Q.items.length)}</p></div>${modes}<div class="q"><button class="btn ghost" type="button" data-say="${esc(w)}">${SPK} اسمع</button>${inner}</div>`;
+  if(!Q.played){ Q.played=true; setTimeout(()=>say(w),300); }
+  view.querySelectorAll('[data-lm]').forEach(b=>b.onclick=()=>{lx.mode=b.dataset.lm; lx.q=null; renderLetters();});
+  view.querySelectorAll('[data-li]').forEach(b=>b.onclick=()=>{const k=+b.dataset.li; Q.sel.has(k)?Q.sel.delete(k):Q.sel.add(k); lettersQuiz();});
+  const c=view.querySelector('#lqc'); if(c) c.onclick=()=>{ Q.done=true; if(r[1].length===Q.sel.size&&r[1].every(i=>Q.sel.has(i))){Q.sc++;addPts(1);} say(w); lettersQuiz(); };
+  view.querySelectorAll('[data-lo]').forEach(b=>b.onclick=()=>{ Q.pick=b.dataset.lo; Q.done=true; if(Q.pick===it.p){Q.sc++;addPts(1);} say(w); lettersQuiz(); });
+  const nx=view.querySelector('#lqn'); if(nx) nx.onclick=()=>{ Q.k++; Q.sel=new Set(); Q.done=false; Q.opt=null; Q.pick=null; Q.played=false; if(Q.k>=Q.items.length){ st.lq=Math.max(st.lq||0,Q.sc); touchStreak(); save(); } lettersQuiz(); };
+}
+
 /* ---------- progress ---------- */
 function renderProgress(){
   const t=today(), H=st.hist||{}, goal=st.goal||PER_DAY, days=Array.from({length:7},(_,k)=>t-6+k), vals=days.map(d=>H[d]||0), mx=Math.max(goal,...vals,1);
@@ -1860,6 +1999,7 @@ const HUBS={
   {k:'mis',t:'أخطائي',d:'الأسئلة والجمل اللي غلطت فيها لحد ما تتقنها',f:()=>renderMistakes(),meta:()=>st.mis&&st.mis.length?n(st.mis.length)+' للمراجعة':''}]},
  learn:{t:'دروس',sub:'القواعد والمحادثات والجمل الجاهزة.',items:[
   {k:'crs',t:'المنهج',d:'٥٦ وحدة متسلسلة على ٦ مستويات ومسار للشغل',f:()=>renderCourse(),meta:()=>{const d=Object.values(st.crs||{}).filter(c=>c.done).length;return d?n(d)+' وحدة خلصتها':''}},
+  {k:'snd',t:'الحروف الصامتة والمركبة',d:'حروف بتتكتب ومبتتنطقش، وحروف بتتنطق مع بعض صوت واحد',f:()=>renderLetters(),meta:()=>st.lq?'آخر اختبار '+n(st.lq)+' من ١٠':''},
   {k:'kidsrep',t:'الأولاد: تقرير وإعدادات',d:'تقدم كل طفل، والرقم السري، ووقت اللعب',f:()=>renderKidsReport(),show:()=>PROFILES.some(p=>p.type!=='adult')},
   {k:'admin',t:'لوحة الأدمن',d:'مين سجل دخول وكل واحد وصل لفين',f:()=>renderAdmin(),show:()=>!!window.__admin},
   {k:'mine',t:'كلماتي',d:'كل كلماتك ومستوى حفظ كل واحدة',f:()=>renderMine(),meta:()=>{const c=Object.keys(st.p).length;return c?n(c)+' كلمة':''}},
@@ -1881,13 +2021,13 @@ function renderHub(name){
   view.innerHTML=`<div class="head"><h2>${h.t}</h2><p class="sub">${h.sub}</p></div><div class="hub">${h.items.filter(it=>!it.show||it.show()).map(it=>`<button class="tile" type="button" data-sub="${it.k}">${ICON[it.k]}<b>${it.t}</b><small>${it.d}</small>${it.meta&&it.meta()?`<span class="meta">${it.meta()}</span>`:''}</button>`).join('')}</div>`;
   view.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{sub[name]=b.dataset.sub; renderHub(name); window.scrollTo(0,0);});
 }
-document.getElementById('backb').onclick=()=>{ if(synth) synth.cancel(); playing=-1; sub[curTab]=null; lessonOpen=null; convOpen=null; stoOpen=null; stoPlay=-1; pt=null; brd.list=null; cv={u:null,step:'v',x:{}}; mz=null; renderHub(curTab); window.scrollTo(0,0); };
+document.getElementById('backb').onclick=()=>{ if(synth) synth.cancel(); playing=-1; sub[curTab]=null; lessonOpen=null; convOpen=null; stoOpen=null; stoPlay=-1; pt=null; brd.list=null; cv={u:null,step:'v',x:{}}; mz=null; lx.q=null; renderHub(curTab); window.scrollTo(0,0); };
 function openSub(tab,k){ sub[tab]=k; go(tab); }
 
 /* ---------- tabs ---------- */
 const views={today:renderToday,review:renderReview,practice:()=>renderHub('practice'),learn:()=>renderHub('learn'),dict:renderDict};
 function go(t){flip=false; curTab=t; playing=-1; if(synth) synth.cancel(); if(t==='review') rq=null; subbar.hidden=true; document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t)); views[t](); try{sessionStorage.setItem('eng-tab',t)}catch(e){} window.scrollTo(0,0);}
-document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{ if(b.dataset.tab===curTab&&HUBS[curTab]){ sub[curTab]=null; lessonOpen=null; convOpen=null; stoOpen=null; stoPlay=-1; pt=null; brd.list=null; cv={u:null,step:'v',x:{}}; mz=null; } go(b.dataset.tab); });
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{ if(b.dataset.tab===curTab&&HUBS[curTab]){ sub[curTab]=null; lessonOpen=null; convOpen=null; stoOpen=null; stoPlay=-1; pt=null; brd.list=null; cv={u:null,step:'v',x:{}}; mz=null; lx.q=null; } go(b.dataset.tab); });
 backFn=()=>{
   const wp=document.getElementById('wpop'); if(wp) return ()=>wp.remove();
   if(curTab==='learn'&&sub.learn==='sto'&&stoOpen!=null) return ()=>{stoOpen=null;stoPlay=-1;if(synth)synth.cancel();renderStories();window.scrollTo(0,0);};
