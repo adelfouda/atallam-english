@@ -588,9 +588,9 @@ function startKid(ME){
   const ksave=()=>{ks.ts=Date.now(); lsSet(SKEY,ks); if(window.__onKidSave) window.__onKidSave(SKEY,ks);};
   const root=document.getElementById('kid'); root.hidden=false;
   const synth=window.speechSynthesis; let v=null;
-  const pick=()=>{ if(!synth) return; const vs=synth.getVoices(); v=vs.find(x=>(x.lang||'').replace('_','-')==='en-US'&&/Samantha|Google US|Aria|Jenny|Ava/i.test(x.name))||vs.find(x=>(x.lang||'').replace('_','-')==='en-US')||null; };
+  const pick=()=>{ if(!synth) return; const vs=synth.getVoices(); v=vs.find(x=>(x.lang||'').replace('_','-')==='en-US'&&/Natural/i.test(x.name))||vs.find(x=>(x.lang||'').replace('_','-')==='en-US'&&/Samantha|Aria|Jenny|Ava/i.test(x.name))||vs.find(x=>(x.lang||'').replace('_','-')==='en-US'&&/Google US/i.test(x.name))||vs.find(x=>(x.lang||'').replace('_','-')==='en-US')||null; };
   if(synth){pick(); synth.addEventListener&&synth.addEventListener('voiceschanged',pick);}
-  const say=(t,rate)=>{ if(!synth) return; try{ if(!arBusy) synth.cancel(); const u=new SpeechSynthesisUtterance(t); u.lang='en-US'; if(v) u.voice=v; u.rate=rate||(small?0.75:0.85); synth.speak(u);}catch(e){} };
+  const say=(t,rate)=>{ if(!synth) return; try{ if(!arBusy) synth.cancel(); const u=new SpeechSynthesisUtterance(t); u.lang='en-US'; if(v) u.voice=v; u.rate=rate||(/\s/.test(String(t).trim())?(small?0.62:0.7):(small?0.55:0.6)); synth.speak(u);}catch(e){} };
   const SAYIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
   const shuffle=a=>{for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a};
   const PRAISE=['Great job!','Well done!','Super!','Amazing!','Good job!'];
@@ -769,7 +769,7 @@ function startKid(ME){
   const KX=D.kx||{ph:[],cvc:[],ch:[],ps:[]};
   const SND={}; KX.ph.forEach(p=>SND[p[0].toLowerCase()]=p[1]);
   const missW=w=>{ ks.miss=ks.miss||{}; ks.miss[w]=(ks.miss[w]||0)+1; ksave(); };
-  const sayQ=(list,gap)=>{ if(!synth) return; if(!arBusy) synth.cancel(); list.forEach(t=>{ const u=new SpeechSynthesisUtterance(t); u.lang='en-US'; if(v) u.voice=v; u.rate=small?0.7:0.8; synth.speak(u); }); };
+  const sayQ=(list,gap)=>{ if(!synth) return; if(!arBusy) synth.cancel(); list.forEach(t=>{ const u=new SpeechSynthesisUtterance(t); u.lang='en-US'; if(v) u.voice=v; u.rate=/\s/.test(String(t).trim())?(small?0.62:0.7):(small?0.55:0.6); synth.speak(u); }); };
   function topicStars(i){ const t=K[i], s=(ks.seen[i]||[]).length; return (s>0?1:0)+(s>=t.items.length?1:0)+(ks.badges[i]?1:0); }
   function home(){
     const nextT=K.findIndex((_,i)=>!ks.badges[i]);
@@ -883,7 +883,7 @@ function startKid(ME){
     const run=k=>{ if(!mode) return; if(k>=c.l.length){ if(!ks.ch[ci]){ks.ch[ci]=1; addStars(2);} missionHit('listen'); burst(); stop(); paint(); return; }
       cur=k; const m=mode; paint();
       if(!synth){ timer=setTimeout(()=>run(k+1),2500); return; }
-      const u=new SpeechSynthesisUtterance(c.l[k][0]); u.lang='en-US'; if(v) u.voice=v; u.rate=small?0.75:0.85;
+      const u=new SpeechSynthesisUtterance(c.l[k][0]); u.lang='en-US'; if(v) u.voice=v; u.rate=small?0.62:0.7;
       u.onend=()=>{ if(mode!==m) return; timer=setTimeout(()=>run(k+1), m==='rep'?Math.max(2200,c.l[k][0].split(' ').length*650):350); };
       synth.cancel(); synth.speak(u); };
     paint();
@@ -1051,13 +1051,16 @@ function grade(i,ok){
 /* ---------- speech ---------- */
 const synth=window.speechSynthesis; let voice=null, voiceGB=null;
 function pickVoice(){ if(!synth) return; const vs=synth.getVoices(); const L=v=>(v.lang||'').replace('_','-');
-  voice=vs.find(v=>L(v)==='en-US'&&/Samantha|Google US|Aria|Jenny|Ava/i.test(v.name))||vs.find(v=>L(v)==='en-US')||vs.find(v=>/^en/i.test(L(v)))||null;
-  voiceGB=vs.find(v=>L(v)==='en-GB'&&/Daniel|Google UK|Sonia|Libby|Serena|Kate/i.test(v.name))||vs.find(v=>L(v)==='en-GB')||null; }
+  voice=vs.find(v=>L(v)==='en-US'&&/Natural/i.test(v.name))||vs.find(v=>L(v)==='en-US'&&/Samantha|Aria|Jenny|Ava/i.test(v.name))||vs.find(v=>L(v)==='en-US'&&/Google US/i.test(v.name))||vs.find(v=>L(v)==='en-US')||vs.find(v=>/^en/i.test(L(v)))||null;
+  voiceGB=vs.find(v=>L(v)==='en-GB'&&/Natural/i.test(v.name))||vs.find(v=>L(v)==='en-GB'&&/Daniel|Google UK|Sonia|Libby|Serena|Kate/i.test(v.name))||vs.find(v=>L(v)==='en-GB')||null; }
 if(synth){ pickVoice(); synth.onvoiceschanged=pickVoice; } else document.getElementById('voiceNote').hidden=false;
-function say(text,acc){ if(!synth) return; try{ synth.cancel(); const u=new SpeechSynthesisUtterance(text); const gb=acc==='gb'; u.lang=gb?'en-GB':'en-US'; const v=gb?voiceGB:voice; if(v) u.voice=v; u.rate=st.slow?0.6:0.9; synth.speak(u);}catch(e){} }
+const SPD=[0.5,0.68,0.88], SPDN=['بطيء جدًا','بطيء','عادي'];
+if(st.spd==null){ st.spd=st.slow?0:1; st.slow=false; }
+function rateFor(text){ const base=st.slow?0.5:SPD[st.spd]; return /\s/.test(String(text).trim())?base:Math.max(0.45,base*0.85); }
+function say(text,acc){ if(!synth) return; try{ synth.cancel(); const u=new SpeechSynthesisUtterance(text); const gb=acc==='gb'; u.lang=gb?'en-GB':'en-US'; const v=gb?voiceGB:voice; if(v) u.voice=v; u.rate=rateFor(text); synth.speak(u);}catch(e){} }
 const speedBtn=document.getElementById('speed');
-const paintSpeed=()=>speedBtn.textContent='سرعة الصوت: '+(st.slow?'بطيء':'عادي');
-speedBtn.onclick=()=>{st.slow=!st.slow; save(); paintSpeed();}; paintSpeed();
+const paintSpeed=()=>speedBtn.textContent='سرعة الصوت: '+SPDN[st.spd];
+speedBtn.onclick=()=>{st.slow=false; st.spd=(st.spd+2)%3; save(); paintSpeed(); say('This is the new speed.');}; paintSpeed();
 
 /* ---------- helpers ---------- */
 const view=document.getElementById('view');
@@ -1397,7 +1400,7 @@ function renderLessons(){
 
 /* ---------- conversations ---------- */
 const C=D.con; let convOpen=null, convRole=-1, revealed=new Set(), playing=-1, convRes={};
-function sayLine(text,onend){ if(!synth) return onend&&onend(); try{ synth.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang='en-US'; if(voice) u.voice=voice; u.rate=st.slow?0.6:0.9; u.onend=()=>onend&&onend(); u.onerror=()=>onend&&onend(); synth.speak(u);}catch(e){onend&&onend();} }
+function sayLine(text,onend){ if(!synth) return onend&&onend(); try{ synth.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang='en-US'; if(voice) u.voice=voice; u.rate=rateFor(text); u.onend=()=>onend&&onend(); u.onerror=()=>onend&&onend(); synth.speak(u);}catch(e){onend&&onend();} }
 function renderConvos(){
   if(convOpen==null){
     view.innerHTML=`<div class="head"><h2>محادثات</h2><p class="sub">مواقف من الشغل والحياة اليومية. اسمع المحادثة، وبعدين اختار دورك واتمرن على الرد.</p></div>
